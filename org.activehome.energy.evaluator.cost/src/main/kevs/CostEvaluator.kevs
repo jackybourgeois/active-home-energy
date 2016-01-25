@@ -1,0 +1,112 @@
+add ah : JavaNode/5.2.8
+set ah.log = "DEBUG"
+
+add ah.timekeeper : org.activehome.service.time.TimeKeeper/0.0.1-SNAPSHOT
+set ah.timekeeper.startDate = "2013-07-24 00:00:00"
+set ah.timekeeper.zipFactor = "x1800"
+set ah.timekeeper.showTic = "true"
+
+add chan_tic_timekeeper : AsyncBroadcast
+bind ah.timekeeper.tic chan_tic_timekeeper
+bind ah.timekeeper.time chan_tic_timekeeper
+add chan_getRequest_timekeeper : AsyncBroadcast
+bind ah.timekeeper.getRequest chan_getRequest_timekeeper
+add chan_pushResponse_timekeeper : AsyncBroadcast
+bind ah.timekeeper.pushResponse chan_pushResponse_timekeeper
+
+add ah.context : org.activehome.context.mysql.MySQLContext/0.0.1-SNAPSHOT
+set ah.context.urlSQLSource = "jdbc:mysql://localhost:3306/eon?user=demo&password=demo"
+set ah.context.showNotif = "false"
+bind ah.context.time chan_tic_timekeeper
+add chan_pushNotif_context : AsyncBroadcast
+bind ah.context.pushNotif chan_pushNotif_context
+add chan_pushDataToSystem_context : AsyncBroadcast
+bind ah.context.pushDataToSystem chan_pushDataToSystem_context
+
+add chan_pushNotif_timekeeper : AsyncBroadcast
+bind ah.timekeeper.pushNotif chan_pushNotif_timekeeper
+bind ah.context.getNotif chan_pushNotif_timekeeper
+add chan_getNotif_context : AsyncBroadcast
+bind ah.context.getNotif chan_getNotif_context
+
+add ah.taskScheduler : org.activehome.service.task.TaskScheduler/0.0.1-SNAPSHOT
+add chan_toSchedule_taskScheduler : AsyncBroadcast
+add chan_toExecute_taskScheduler : AsyncBroadcast
+
+bind ah.taskScheduler.time chan_tic_timekeeper
+bind ah.taskScheduler.toSchedule chan_toSchedule_taskScheduler
+bind ah.taskScheduler.toExecute chan_toExecute_taskScheduler
+bind ah.timekeeper.getRequest chan_toExecute_taskScheduler
+
+add ah.tester : org.activehome.energy.evaluator.cost.test.TesterCostEvaluator/0.0.1-SNAPSHOT
+set ah.tester.startDate = "2013-07-19 00:00:00"
+set ah.tester.testDuration = "1d"
+bind ah.tester.time chan_tic_timekeeper
+bind ah.tester.toSchedule chan_toSchedule_taskScheduler
+bind ah.tester.pushRequest chan_getRequest_timekeeper
+bind ah.tester.getResponse chan_pushResponse_timekeeper
+bind ah.tester.getNotif chan_pushNotif_context
+bind ah.tester.getNotif chan_pushDataToSystem_context
+add chan_pushRequest_tester : AsyncBroadcast
+bind ah.tester.pushRequest chan_pushRequest_tester
+bind ah.context.getRequest chan_pushRequest_tester
+add chan_getResponse_tester : AsyncBroadcast
+bind ah.tester.getResponse chan_getResponse_tester
+bind ah.context.pushResponse chan_getResponse_tester
+bind ah.tester.pushNotif chan_getNotif_context
+
+add ah.solarGenMeter : org.activehome.energy.io.emulator.EMeter/0.0.1-SNAPSHOT
+set ah.solarGenMeter.urlSQLSource = "jdbc:mysql://localhost:3306/ev?user=demo&password=demo"
+set ah.solarGenMeter.tableName = "ev4"
+set ah.solarGenMeter.dbMetricId = "generation"
+set ah.solarGenMeter.metricId = "power.gen.Solarpv"
+bind ah.solarGenMeter.time chan_tic_timekeeper
+bind ah.solarGenMeter.toSchedule chan_toSchedule_taskScheduler
+bind ah.solarGenMeter.toExecute chan_toExecute_taskScheduler
+bind ah.solarGenMeter.pushNotif chan_getNotif_context
+
+add ah.baseload : org.activehome.energy.io.emulator.EBaseLoad/0.0.1-SNAPSHOT
+set ah.baseload.urlSQLSource = "jdbc:mysql://localhost:3306/ev?user=demo&password=demo"
+set ah.baseload.tableName = "ev4"
+set ah.baseload.dbMetricImport = "import"
+set ah.baseload.dbMetricGeneration = "generation"
+set ah.baseload.dbMetricExport = "export"
+bind ah.baseload.time chan_tic_timekeeper
+bind ah.baseload.toSchedule chan_toSchedule_taskScheduler
+bind ah.baseload.toExecute chan_toExecute_taskScheduler
+bind ah.baseload.pushNotif chan_getNotif_context
+
+add ah.costEval : org.activehome.energy.evaluator.cost.CostEvaluator/0.0.1-SNAPSHOT
+bind ah.costEval.time chan_tic_timekeeper
+bind ah.costEval.getRequest chan_pushRequest_tester
+bind ah.costEval.pushResponse chan_getResponse_tester
+add chan_pushRequest_costEval : AsyncBroadcast
+bind ah.costEval.pushRequest chan_pushRequest_costEval
+bind ah.context.getRequest chan_pushRequest_costEval
+add chan_getResponse_costEval : AsyncBroadcast
+bind ah.costEval.getResponse chan_getResponse_costEval
+bind ah.context.pushResponse chan_getResponse_costEval
+
+add ah.importFM : org.activehome.energy.io.emulator.fiscalmeter.EDualRateFM/0.0.1-SNAPSHOT
+set ah.importFM.metricId = "tariff.elec.import"
+set ah.importFM.highRate = "0.15771"
+set ah.importFM.lowRate = "0.06615"
+set ah.importFM.switchTime = "7h"
+bind ah.importFM.time chan_tic_timekeeper
+bind ah.importFM.pushNotif chan_getNotif_context
+
+add ah.generationFM : org.activehome.energy.io.emulator.fiscalmeter.EConstantFM/0.0.1-SNAPSHOT
+set ah.generationFM.metricId = "tariff.elec.generation"
+set ah.generationFM.rate = "0.135"
+bind ah.generationFM.time chan_tic_timekeeper
+bind ah.generationFM.pushNotif chan_getNotif_context
+
+add ah.exportFM : org.activehome.energy.io.emulator.fiscalmeter.EConstantFM/0.0.1-SNAPSHOT
+set ah.exportFM.metricId = "tariff.elec.export"
+set ah.exportFM.rate = "0.046"
+bind ah.exportFM.time chan_tic_timekeeper
+bind ah.exportFM.pushNotif chan_getNotif_context
+
+add sync : WSGroup
+attach ah sync
+set sync.master = "ah"
