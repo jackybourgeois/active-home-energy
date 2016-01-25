@@ -1,0 +1,124 @@
+<!--
+  #%L
+  Active Home :: Energy :: Widget Energy
+  $Id:$
+  $HeadURL:$
+  %%
+  Copyright (C) 2016 org.activehome
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as
+  published by the Free Software Foundation, either version 3 of the 
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public 
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/gpl-3.0.html>.
+  #L%
+  -->
+<polymer-element name="energy-generation" extends="my-widget">
+
+    <template>
+        <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg"
+             xmlns:xlink="http://www.w3.org/1999/xlink" style="width: 100%; height: 100%" viewBox="0 0 500 500" id="svg3437" version="1.1">
+            <style>
+                .s0{
+                    fill:#2d2c35;
+                    stroke-width:0.51;
+                    stroke:#000;
+                }
+
+            </style>  <defs id="defs3439">
+            <linearGradient id="linearGradient4321">
+                <stop offset="0" id="stop4323" style="stop-color:#ffffff;stop-opacity:0.64"/>
+                <stop offset="1" id="stop4325" style="stop-color:#ffffff;stop-opacity:0"/>
+            </linearGradient>
+            <radialGradient xlink:href="#linearGradient4321" id="radialGradient4327" cx="238.9" cy="720.02" fx="238.9" fy="720.02" r="173.24" gradientTransform="matrix(0.70160585,-0.38136842,0.29758338,0.36430666,-125.85027,567.73414)" gradientUnits="userSpaceOnUse"/>
+        </defs>
+            <metadata id="metadata3442"/>
+            <g id="layer1" transform="translate(0,-552.36216)">
+                <ellipse id="path3519" cx="256.03" cy="738.93" rx="235.91" ry="98.71" fill="url(#radialGradient4327)"/>
+                <path d="M52.5 751.2 98.77 766.12 140.95 736.25 94.22 723.31Z" id="path5335-2" class="s0"/>
+                <path id="path5337-8" d="m107.31 768.33 46.27 14.93 42.18-29.87-46.73-12.94z" class="s0"/>
+                <path d="m160.39 785.44 46.27 14.93 42.18-29.87-46.73-12.94z" id="path5339-6" class="s0"/>
+                <path id="path5341-3" d="m216.9 802.58 46.27 14.93 42.18-29.87-46.73-12.94z" class="s0"/>
+                <path id="path5343-4" d="m100.45 716.95 46.27 14.93 42.18-29.87-46.73-12.94z" class="s0"/>
+                <path d="m155.25 734.06 46.27 14.93 42.18-29.87-46.73-12.94z" id="path5345-1" class="s0"/>
+                <path id="path5348-5" d="m208.34 751.2 46.27 14.93 42.18-29.87-46.73-12.94z" class="s0"/>
+                <path d="m264.85 768.33 46.27 14.93 42.18-29.87-46.73-12.94z" id="path5350-1" class="s0"/>
+                <path d="m146.69 682.68 46.27 14.93 42.18-29.87-46.73-12.94z" id="path5352-4" class="s0"/>
+                <path id="path5354-2" d="m201.48 699.81 46.27 14.93 42.18-29.87-46.73-12.94z" class="s0"/>
+                <path d="m254.58 716.95 46.27 14.93 42.18-29.87-46.73-12.94z" id="path5356-3" class="s0"/>
+                <path id="path5358-9" d="m311.09 734.06 46.27 14.93 42.18-29.87-46.73-12.94z" class="s0"/>
+                <path id="path5360-9" d="m194.64 648.43 46.27 14.93 42.18-29.87-46.73-12.94z" class="s0"/>
+                <path d="m249.44 665.56 46.27 14.93 42.18-29.87-46.73-12.94z" id="path5362-8" class="s0"/>
+                <path id="path5364-0" d="m302.53 682.68 46.27 14.93 42.18-29.87-46.73-12.94z" class="s0"/>
+                <path d="m359.05 699.81 46.27 14.93 42.18-29.87-46.73-12.94z" id="path5366-7" class="s0"/>
+                <text id="genVal" y="976.65" x="423.05" style="fill:#FFFFFF;font-size:150px;text-anchor:end">-</text>
+                <text id="unit" y="976.65" x="428.05" style="fill:#FFFFFF;font-size:40px;text-anchor:start">W</text>
+            </g>
+        </svg>
+    </template>
+
+    <script>
+        Polymer('energy-generation', {
+            gen: {value: 0, metricId: "power.gen", ts: 0},
+
+            ready: function () {
+
+            },
+
+            init: function (attributes, data) {
+                this.data = data;
+
+                if (data != null) {
+                    for (key in data) {
+                        document.querySelector("web-socket").subscribe(this.id, key);
+                        if (key == "power.gen") {
+                            this.gen.value = data[key] != "" ? parseFloat(data[key].value) : 0;
+                        }
+                    }
+                }
+                this.updateValues();
+            },
+
+            input: function (json) {
+                if (json.hasOwnProperty("content")) {
+                    if (json.content.metricId == "power.gen") {
+                        this.gen.value = parseFloat(json.content.value);
+                    }
+                }
+                this.updateValues();
+            },
+
+            updateValues: function () {
+                this.shadowRoot.querySelector("#genVal").textContent = this.gen.value.toFixed(0);
+            },
+
+            click: function () {
+
+            },
+
+            resize_start: function (e, ui, widget, grid) {
+
+            },
+
+            resize_stop: function (e, ui, widget, grid) {
+
+            },
+
+            drag_start: function (e, ui, widget, grid) {
+
+            },
+
+            drag_stop: function (e, ui, widget, grid) {
+
+            }
+        });
+    </script>
+</polymer-element>

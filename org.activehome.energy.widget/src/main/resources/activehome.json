@@ -1,0 +1,9 @@
+{
+  "module":"energy",
+  "widgets":[
+    {"name":"battery-cost", "title": "Battery cost", "description": "Battery cost description", "requirement":"", "img":"battery-cost/battery-cost.png"},
+    {"name":"battery-emission", "title": "Battery emission", "description": "Battery emission description", "requirement":"", "img":"battery-emission/battery-emission.png"},
+    {"name":"energy-miles", "title": "Energy miles", "description": "Energy miles description", "requirement":"", "img":"energy-miles/energy-miles.png"}
+  ]
+
+}

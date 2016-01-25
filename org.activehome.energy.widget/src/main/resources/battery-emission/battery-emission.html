@@ -1,0 +1,158 @@
+<!--
+  #%L
+  Active Home :: Energy :: Widget Energy
+  $Id:$
+  $HeadURL:$
+  %%
+  Copyright (C) 2016 org.activehome
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as
+  published by the Free Software Foundation, either version 3 of the 
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public 
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/gpl-3.0.html>.
+  #L%
+  -->
+<polymer-element name="battery-emission" extends="my-widget">
+
+    <template>
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="battery" version="1.1" viewBox="0 0 100 200" style="height:100%;width:100%">
+            <style>
+                .s0{ stop-color:#000000; stop-opacity:1; }
+                .s1{ stop-color:#ffffff; stop-opacity:0; }
+                .s2{ stop-color:#666666; stop-opacity:1; }
+
+            </style>
+            <defs id="defs4556">
+                <linearGradient xlink:href="#linearGradient4280" id="linearGradient4128" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.3991981,0,0,0.56258818,-22.14091,805.40143)" x1="56.14" y1="178.79" x2="305.29" y2="178.79"/>
+                <linearGradient id="linearGradient4280">
+                    <stop offset="0" id="stop4282" class="s0"/>
+                    <stop id="stop4284" offset="0.5" class="s1"/>
+                    <stop id="stop4286" offset="1" class="s0"/>
+                </linearGradient>
+                <linearGradient xlink:href="#greenStop" id="green" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.3991981,0,0,0.3839758,-22.14091,891.81365)" x1="56.14" y1="178.79" x2="305.29" y2="178.79"/>
+                <linearGradient id="greenStop">
+                    <stop id="stop4274" offset="0" class="s0"/>
+                    <stop offset="0.5" id="stop4276" style="stop-color:#3bd320;stop-opacity:1"/>
+                    <stop offset="1" id="stop4278" class="s0"/>
+                </linearGradient>
+                <linearGradient xlink:href="#orangeStop" id="orange" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.3991981,0,0,0.3839758,-22.14091,891.81365)" x1="56.14" y1="178.79" x2="305.29" y2="178.79"/>
+                <linearGradient id="orangeStop">
+                    <stop id="stop4274" offset="0" class="s0"/>
+                    <stop offset="0.5" id="stop4276" style="stop-color: #ff9900;stop-opacity:1"/>
+                    <stop offset="1" id="stop4278" class="s0"/>
+                </linearGradient>
+                <linearGradient xlink:href="#redStop" id="red" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.3991981,0,0,0.44316611,-22.14091,933.67143)" x1="56.14" y1="178.79" x2="305.29" y2="178.79"/>
+                <linearGradient id="redStop">
+                    <stop offset="0" id="stop4557" class="s0"/>
+                    <stop id="stop4559" offset="0.5" style="stop-color:#d32030;stop-opacity:1"/>
+                    <stop id="stop4561" offset="1" class="s0"/>
+                </linearGradient>
+                <linearGradient xlink:href="#linearGradient3815" id="linearGradient4122" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.1222977,0,0,0.08114916,29.723891,845.51384)" x1="56.14" y1="178.79" x2="305.29" y2="178.79"/>
+                <linearGradient id="linearGradient3815">
+                    <stop offset="0" id="stop3817" class="s2"/>
+                    <stop id="stop3819" offset="0.5" style="stop-color:#ffffff;stop-opacity:1"/>
+                    <stop id="stop3821" offset="1" class="s2"/>
+                </linearGradient>
+                <linearGradient xlink:href="#linearGradient4280" id="linearGradient4120" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.33697445,0,0,0.04363228,42.229197,664.30249)" x1="56.14" y1="178.79" x2="305.29" y2="178.79"/>
+                <linearGradient id="linearGradient4539">
+                    <stop offset="0" id="stop4541" class="s0"/>
+                    <stop id="stop4543" offset="0.5" class="s1"/>
+                    <stop id="stop4545" offset="1" class="s0"/>
+                </linearGradient>
+                <linearGradient y2="178.79" x2="305.29" y1="178.79" x1="56.14" gradientTransform="matrix(0.3991981,0,0,0.08114916,-22.14091,849.18042)" gradientUnits="userSpaceOnUse" id="grey" xlink:href="#linearGradient4280"/>
+            </defs>
+            <g id="layer1">
+                <rect id="rect4110" width="98.66" height="14.26" x="0.67" y="4" rx="69.48" ry="7.86" style="fill:url(#grey);"/>
+                <rect id="rect4112" width="30.22" height="14.26" x="36.71" y="0" rx="69.48" ry="4.47" style="fill:url(#linearGradient4122);"/>
+                <rect id="part1" width="98.66" height="77.87" x="0.67" y="121.97" rx="69.48" ry="7.59" style="fill:url(#red);"/>
+                <rect id="part2" width="98.66" height="40" x="0.67" y="114.73" rx="69.48" ry="9.54" style="fill:url(#orange);"/>
+                <rect id="part3" width="98.66" height="60" x="0.67" y="74.73" rx="69.48" ry="12.54" style="fill:url(#green);"/>
+                <rect id="rect4118" width="98.66" height="98.85" x="0.67" y="4.56" rx="69.48" ry="5.77" style="fill:url(#linearGradient4128);"/>
+                <image xlink:href="widgets/battery-emission/ev.png" x="20" y="-5" height="20px" width="30px" />
+            </g>
+        </svg>
+    </template>
+
+    <script>
+        Polymer('battery-emission', {
+            legend: false,
+
+            ready: function() {
+
+            },
+
+            init: function(attributes, data) {
+                this.data = data;
+                if (attributes!=null && attributes.hasOwnProperty("legend")) {
+                    this.legend = attributes.legend;
+                }
+                this.show_legend();
+
+                if (data!=null) {
+                    for (key in data) {
+                        document.querySelector("web-socket").subscribe(this.uuid, key);
+                    }
+                }
+
+                this.update_battery_mix();
+
+                this.check_size();
+            },
+
+            check_size: function() {
+                var newHeight = document.getElementById(this.uuid).dataset.gsHeight;
+                var newWidth = document.getElementById(this.uuid).dataset.gsWidth;
+                if (newHeight<newWidth) {
+                    this.shadowRoot.querySelector("#layer1").setAttribute("transform", "rotate(90 0 0)");
+                    this.shadowRoot.querySelector("#battery").setAttribute("viewBox", "-200 0 200 100");
+                } else {
+                    this.shadowRoot.querySelector("#layer1").setAttribute("transform", "");
+                    this.shadowRoot.querySelector("#battery").setAttribute("viewBox", "0 0 100 200");
+                }
+            },
+
+            click: function() {
+                this.legend = !this.legend;
+                this.show_legend();
+            },
+
+            show_legend: function() {
+
+            },
+
+            update_battery_mix: function() {
+
+            },
+
+            resize_start: function (e, ui, widget, grid) {
+            },
+
+            resize_stop: function (e, ui, widget, grid) {
+                var newHeight = ui.size.height;
+                var newWidth = ui.size.width;
+                if (newHeight<newWidth) {
+                    this.shadowRoot.querySelector("#layer1").setAttribute("transform", "rotate(90 0 0)");
+                    this.shadowRoot.querySelector("#battery").setAttribute("viewBox", "-200 0 200 100");
+                } else {
+                    this.shadowRoot.querySelector("#layer1").setAttribute("transform", "");
+                    this.shadowRoot.querySelector("#battery").setAttribute("viewBox", "0 0 100 200");
+                }
+            },
+
+            drag_start: function (e, ui, widget, grid) {
+            },
+
+            drag_stop: function (e, ui, widget, grid) {
+            }
+        });
+    </script>
+</polymer-element>
