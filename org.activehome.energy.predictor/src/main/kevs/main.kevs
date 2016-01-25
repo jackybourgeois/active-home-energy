@@ -1,0 +1,93 @@
+add ah : JavaNode/5.2.9
+set ah.log = "DEBUG"
+
+add ah.timekeeper : org.activehome.service.time.TimeKeeper/0.0.1-SNAPSHOT
+set ah.timekeeper.startDate = "2013-07-24 00:00:00"
+set ah.timekeeper.zipFactor = "x900"
+
+add chan_tic_timekeeper : AsyncBroadcast
+bind ah.timekeeper.tic chan_tic_timekeeper
+bind ah.timekeeper.time chan_tic_timekeeper
+add chan_getRequest_timekeeper : AsyncBroadcast
+bind ah.timekeeper.getRequest chan_getRequest_timekeeper
+add chan_pushResponse_timekeeper : AsyncBroadcast
+bind ah.timekeeper.pushResponse chan_pushResponse_timekeeper
+
+add ah.context : org.activehome.context.mysql.MySQLContext/0.0.1-SNAPSHOT
+bind ah.context.time chan_tic_timekeeper
+add chan_pushNotif_context : AsyncBroadcast
+bind ah.context.pushNotif chan_pushNotif_context
+add chan_pushDataToSystem_context : AsyncBroadcast
+bind ah.context.pushDataToSystem chan_pushDataToSystem_context
+
+add chan_pushNotif_timekeeper : AsyncBroadcast
+bind ah.timekeeper.pushNotif chan_pushNotif_timekeeper
+bind ah.context.getNotif chan_pushNotif_timekeeper
+add chan_getNotif_context : AsyncBroadcast
+bind ah.context.getNotif chan_getNotif_context
+
+add ah.taskScheduler : org.activehome.service.task.TaskScheduler/0.0.1-SNAPSHOT
+add chan_toSchedule_taskScheduler : AsyncBroadcast
+add chan_toExecute_taskScheduler : AsyncBroadcast
+
+bind ah.taskScheduler.time chan_tic_timekeeper
+bind ah.taskScheduler.toSchedule chan_toSchedule_taskScheduler
+bind ah.taskScheduler.toExecute chan_toExecute_taskScheduler
+
+add ah.weather : EWeatherHourlyForecast/0.0.1-SNAPSHOT
+set ah.weather.urlSQLSource = "jdbc:mysql://localhost:3306/eon?user=demo&password=demo"
+bind ah.weather.time chan_tic_timekeeper
+bind ah.weather.toSchedule chan_toSchedule_taskScheduler
+bind ah.weather.toExecute chan_toExecute_taskScheduler
+bind ah.weather.pushNotif chan_getNotif_context
+
+add ah.solarGenMeter : org.activehome.energy.io.emulator.EMeter/0.0.1-SNAPSHOT
+set ah.solarGenMeter.urlSQLSource = "jdbc:mysql://localhost:3306/eon?user=demo&password=demo"
+set ah.solarGenMeter.tableName = "raw_data_48"
+set ah.solarGenMeter.dbMetricId = "Solarpv"
+set ah.solarGenMeter.metricId = "power.gen.Solarpv"
+bind ah.solarGenMeter.time chan_tic_timekeeper
+bind ah.solarGenMeter.toSchedule chan_toSchedule_taskScheduler
+bind ah.solarGenMeter.toExecute chan_toExecute_taskScheduler
+bind ah.solarGenMeter.pushNotif chan_getNotif_context
+
+add ah.predictor : org.activehome.energy.prediction.SolarGenerationPredictor/0.0.1-SNAPSHOT
+set ah.predictor.metric = "prediction.energy.gen"
+set ah.predictor.actualMetric = "energy.gen"
+set ah.predictor.discrete = "true"
+set ah.predictor.evaluation = "true"
+set ah.predictor.numOfDay = "5"
+set ah.predictor.skyCoverMetric = "weather.forecast.hourly.sky_cover"
+bind ah.predictor.time chan_tic_timekeeper
+bind ah.predictor.toSchedule chan_toSchedule_taskScheduler
+bind ah.predictor.getRequest chan_toExecute_taskScheduler
+bind ah.predictor.getNotif chan_pushDataToSystem_context
+add chan_pushRequest_predictor : AsyncBroadcast
+bind ah.predictor.pushRequest chan_pushRequest_predictor
+bind ah.context.getRequest chan_pushRequest_predictor
+add chan_getResponse_predictor : AsyncBroadcast
+bind ah.predictor.getResponse chan_getResponse_predictor
+bind ah.context.pushResponse chan_getResponse_predictor
+
+add ah.tester : org.activehome.energy.prediction.test.TesterSolarGenerationPredictor/0.0.1-SNAPSHOT
+set ah.tester.startDate = "2013-07-24 00:00:00"
+set ah.tester.testDuration = "86400000"
+bind ah.tester.time chan_tic_timekeeper
+bind ah.tester.toSchedule chan_toSchedule_taskScheduler
+bind ah.tester.pushRequest chan_getRequest_timekeeper
+bind ah.tester.getResponse chan_pushResponse_timekeeper
+bind ah.tester.getNotif chan_pushNotif_context
+bind ah.tester.getNotif chan_pushDataToSystem_context
+add chan_pushRequest_tester : AsyncBroadcast
+bind ah.tester.pushRequest chan_pushRequest_tester
+bind ah.context.getRequest chan_pushRequest_tester
+bind ah.predictor.getRequest chan_pushRequest_tester
+add chan_getResponse_tester : AsyncBroadcast
+bind ah.tester.getResponse chan_getResponse_tester
+bind ah.context.pushResponse chan_getResponse_tester
+bind ah.predictor.pushResponse chan_getResponse_tester
+bind ah.tester.pushNotif chan_getNotif_context
+
+add sync : WSGroup
+attach ah sync
+set sync.master = "ah"
