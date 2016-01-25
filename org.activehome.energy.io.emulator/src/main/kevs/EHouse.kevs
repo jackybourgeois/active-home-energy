@@ -1,0 +1,184 @@
+add ah : JavaNode/5.2.8
+set ah.log = "DEBUG"
+
+add ah.timekeeper : org.activehome.service.time.TimeKeeper/0.0.1-SNAPSHOT
+set ah.timekeeper.startDate = "2013-07-24 00:00:00"
+set ah.timekeeper.zipFactor = "x1800"
+set ah.timekeeper.showTic = "true"
+
+add chan_tic_timekeeper : AsyncBroadcast
+bind ah.timekeeper.tic chan_tic_timekeeper
+bind ah.timekeeper.time chan_tic_timekeeper
+add chan_getRequest_timekeeper : AsyncBroadcast
+bind ah.timekeeper.getRequest chan_getRequest_timekeeper
+add chan_pushResponse_timekeeper : AsyncBroadcast
+bind ah.timekeeper.pushResponse chan_pushResponse_timekeeper
+
+add ah.context : org.activehome.context.mysql.MySQLContext/0.0.1-SNAPSHOT
+set ah.context.urlSQLSource = "jdbc:mysql://localhost:3306/eon?user=demo&password=demo"
+set ah.context.showNotif = "false"
+bind ah.context.time chan_tic_timekeeper
+add chan_pushNotif_context : AsyncBroadcast
+bind ah.context.pushNotif chan_pushNotif_context
+add chan_pushDataToSystem_context : AsyncBroadcast
+bind ah.context.pushDataToSystem chan_pushDataToSystem_context
+
+add chan_pushNotif_timekeeper : AsyncBroadcast
+bind ah.timekeeper.pushNotif chan_pushNotif_timekeeper
+bind ah.context.getNotif chan_pushNotif_timekeeper
+add chan_getNotif_context : AsyncBroadcast
+bind ah.context.getNotif chan_getNotif_context
+
+add ah.taskScheduler : org.activehome.service.task.TaskScheduler/0.0.1-SNAPSHOT
+add chan_toSchedule_taskScheduler : AsyncBroadcast
+add chan_toExecute_taskScheduler : AsyncBroadcast
+
+bind ah.taskScheduler.time chan_tic_timekeeper
+bind ah.taskScheduler.toSchedule chan_toSchedule_taskScheduler
+bind ah.taskScheduler.toExecute chan_toExecute_taskScheduler
+bind ah.timekeeper.getRequest chan_toExecute_taskScheduler
+
+add ah.tester : org.activehome.energy.io.emulator.test.TesterEHouse/0.0.1-SNAPSHOT
+set ah.tester.startDate = "2013-07-19 00:00:00"
+set ah.tester.testDuration = "1d"
+set ah.tester.urlSQLSource = "jdbc:mysql://localhost:3306/ev?user=demo&password=demo"
+set ah.tester.tableName = "ev4"
+set ah.tester.dbMetricImport = "import"
+set ah.tester.dbMetricGeneration = "generation"
+set ah.tester.dbMetricExport = "export"
+bind ah.tester.time chan_tic_timekeeper
+bind ah.tester.toSchedule chan_toSchedule_taskScheduler
+bind ah.tester.pushRequest chan_getRequest_timekeeper
+bind ah.tester.getResponse chan_pushResponse_timekeeper
+bind ah.tester.getNotif chan_pushNotif_context
+bind ah.tester.getNotif chan_pushDataToSystem_context
+add chan_pushRequest_tester : AsyncBroadcast
+bind ah.tester.pushRequest chan_pushRequest_tester
+bind ah.context.getRequest chan_pushRequest_tester
+add chan_getResponse_tester : AsyncBroadcast
+bind ah.tester.getResponse chan_getResponse_tester
+bind ah.context.pushResponse chan_getResponse_tester
+bind ah.tester.pushNotif chan_getNotif_context
+add chan_interactive_ctrl : AsyncBroadcast
+bind ah.tester.toInteractive chan_interactive_ctrl
+
+add ah.solarGenMeter : org.activehome.energy.io.emulator.EMeter/0.0.1-SNAPSHOT
+set ah.solarGenMeter.urlSQLSource = "jdbc:mysql://localhost:3306/ev?user=demo&password=demo"
+set ah.solarGenMeter.tableName = "ev4"
+set ah.solarGenMeter.dbMetricId = "generation"
+set ah.solarGenMeter.metricId = "power.gen.Solarpv"
+bind ah.solarGenMeter.time chan_tic_timekeeper
+bind ah.solarGenMeter.toSchedule chan_toSchedule_taskScheduler
+bind ah.solarGenMeter.toExecute chan_toExecute_taskScheduler
+bind ah.solarGenMeter.pushNotif chan_getNotif_context
+
+add ah.importMeter : org.activehome.energy.io.emulator.EMeter/0.0.1-SNAPSHOT
+set ah.importMeter.urlSQLSource = "jdbc:mysql://localhost:3306/ev?user=demo&password=demo"
+set ah.importMeter.tableName = "ev4"
+set ah.importMeter.dbMetricId = "import"
+set ah.importMeter.metricId = "origin.power.import"
+bind ah.importMeter.time chan_tic_timekeeper
+bind ah.importMeter.toSchedule chan_toSchedule_taskScheduler
+bind ah.importMeter.toExecute chan_toExecute_taskScheduler
+bind ah.importMeter.pushNotif chan_getNotif_context
+
+add ah.exportMeter : org.activehome.energy.io.emulator.EMeter/0.0.1-SNAPSHOT
+set ah.exportMeter.urlSQLSource = "jdbc:mysql://localhost:3306/ev?user=demo&password=demo"
+set ah.exportMeter.tableName = "ev4"
+set ah.exportMeter.dbMetricId = "export"
+set ah.exportMeter.metricId = "origin.power.export"
+bind ah.exportMeter.time chan_tic_timekeeper
+bind ah.exportMeter.toSchedule chan_toSchedule_taskScheduler
+bind ah.exportMeter.toExecute chan_toExecute_taskScheduler
+bind ah.exportMeter.pushNotif chan_getNotif_context
+
+add ah.baseload : org.activehome.energy.io.emulator.EBaseLoad/0.0.1-SNAPSHOT
+set ah.baseload.urlSQLSource = "jdbc:mysql://localhost:3306/ev?user=demo&password=demo"
+set ah.baseload.tableName = "ev4"
+set ah.baseload.dbMetricImport = "import"
+set ah.baseload.dbMetricGeneration = "generation"
+set ah.baseload.dbMetricExport = "export"
+bind ah.baseload.time chan_tic_timekeeper
+bind ah.baseload.toSchedule chan_toSchedule_taskScheduler
+bind ah.baseload.toExecute chan_toExecute_taskScheduler
+bind ah.baseload.pushNotif chan_getNotif_context
+
+add ah.GarageFridgeFreezer : org.activehome.energy.io.emulator.EBackgroundApp/0.0.1-SNAPSHOT
+set ah.GarageFridgeFreezer.urlSQLSource = "jdbc:mysql://localhost:3306/ev?user=demo&password=demo"
+set ah.GarageFridgeFreezer.tableName = "ev4"
+set ah.GarageFridgeFreezer.dbMetricId = "GarageFridgeFreezer"
+set ah.GarageFridgeFreezer.isInterruptable = "true"
+bind ah.GarageFridgeFreezer.time chan_tic_timekeeper
+bind ah.GarageFridgeFreezer.toSchedule chan_toSchedule_taskScheduler
+bind ah.GarageFridgeFreezer.toExecute chan_toExecute_taskScheduler
+bind ah.GarageFridgeFreezer.pushNotif chan_getNotif_context
+
+add ah.Refrigerator-Freezer : org.activehome.energy.io.emulator.EBackgroundApp/0.0.1-SNAPSHOT
+set ah.Refrigerator-Freezer.urlSQLSource = "jdbc:mysql://localhost:3306/ev?user=demo&password=demo"
+set ah.Refrigerator-Freezer.tableName = "ev4"
+set ah.Refrigerator-Freezer.dbMetricId = "Refrigerator-Freezer"
+set ah.Refrigerator-Freezer.isInterruptable = "true"
+bind ah.Refrigerator-Freezer.time chan_tic_timekeeper
+bind ah.Refrigerator-Freezer.toSchedule chan_toSchedule_taskScheduler
+bind ah.Refrigerator-Freezer.toExecute chan_toExecute_taskScheduler
+bind ah.Refrigerator-Freezer.pushNotif chan_getNotif_context
+
+add ah.LandscapeLights : org.activehome.energy.io.emulator.EBackgroundApp/0.0.1-SNAPSHOT
+set ah.LandscapeLights.urlSQLSource = "jdbc:mysql://localhost:3306/ev?user=demo&password=demo"
+set ah.LandscapeLights.tableName = "ev4"
+set ah.LandscapeLights.dbMetricId = "LandscapeLights"
+bind ah.LandscapeLights.time chan_tic_timekeeper
+bind ah.LandscapeLights.toSchedule chan_toSchedule_taskScheduler
+bind ah.LandscapeLights.toExecute chan_toExecute_taskScheduler
+bind ah.LandscapeLights.pushNotif chan_getNotif_context
+
+add ah.WashingMachine : org.activehome.energy.io.emulator.EInteractiveApp/0.0.1-SNAPSHOT
+set ah.WashingMachine.isNegotiable = "true"
+set ah.WashingMachine.isInterruptable = "true"
+bind ah.WashingMachine.time chan_tic_timekeeper
+bind ah.WashingMachine.pushNotif chan_getNotif_context
+bind ah.WashingMachine.ctrl chan_interactive_ctrl
+
+add ah.Dryer : org.activehome.energy.io.emulator.EInteractiveApp/0.0.1-SNAPSHOT
+set ah.Dryer.isNegotiable = "true"
+set ah.Dryer.isInterruptable = "true"
+bind ah.Dryer.time chan_tic_timekeeper
+bind ah.Dryer.pushNotif chan_getNotif_context
+bind ah.Dryer.ctrl chan_interactive_ctrl
+
+add ah.Dishwasher : org.activehome.energy.io.emulator.EInteractiveApp/0.0.1-SNAPSHOT
+set ah.Dishwasher.isNegotiable = "true"
+set ah.Dishwasher.isInterruptable = "true"
+bind ah.Dishwasher.time chan_tic_timekeeper
+bind ah.Dishwasher.pushNotif chan_getNotif_context
+bind ah.Dishwasher.ctrl chan_interactive_ctrl
+
+add ah.ev : org.activehome.energy.io.emulator.EInteractiveApp/0.0.1-SNAPSHOT
+set ah.ev.isNegotiable = "true"
+bind ah.ev.time chan_tic_timekeeper
+bind ah.ev.pushNotif chan_getNotif_context
+bind ah.ev.ctrl chan_interactive_ctrl
+
+add ah.Microwave : org.activehome.energy.io.emulator.EInteractiveApp/0.0.1-SNAPSHOT
+bind ah.Microwave.time chan_tic_timekeeper
+bind ah.Microwave.pushNotif chan_getNotif_context
+bind ah.Microwave.ctrl chan_interactive_ctrl
+
+add ah.Printer : org.activehome.energy.io.emulator.EInteractiveApp/0.0.1-SNAPSHOT
+bind ah.Printer.time chan_tic_timekeeper
+bind ah.Printer.pushNotif chan_getNotif_context
+bind ah.Printer.ctrl chan_interactive_ctrl
+
+add ah.DesktopComputer : org.activehome.energy.io.emulator.EInteractiveApp/0.0.1-SNAPSHOT
+bind ah.DesktopComputer.time chan_tic_timekeeper
+bind ah.DesktopComputer.pushNotif chan_getNotif_context
+bind ah.DesktopComputer.ctrl chan_interactive_ctrl
+
+add ah.TV : org.activehome.energy.io.emulator.EInteractiveApp/0.0.1-SNAPSHOT
+bind ah.TV.time chan_tic_timekeeper
+bind ah.TV.pushNotif chan_getNotif_context
+bind ah.TV.ctrl chan_interactive_ctrl
+
+add sync : WSGroup
+attach ah sync
+set sync.master = "ah"
