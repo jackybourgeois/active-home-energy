@@ -1,7 +1,7 @@
 add ah : JavaNode/5.2.9
 set ah.log = "DEBUG"
 
-add ah.timekeeper : org.activehome.service.time.TimeKeeper/0.0.1-SNAPSHOT
+add ah.timekeeper : org.activehome.timekeeper.TimeKeeper/0.0.1-SNAPSHOT
 set ah.timekeeper.startDate = "2013-07-24 00:00:00"
 set ah.timekeeper.zipFactor = "x900"
 
@@ -26,7 +26,7 @@ bind ah.context.getNotif chan_pushNotif_timekeeper
 add chan_getNotif_context : AsyncBroadcast
 bind ah.context.getNotif chan_getNotif_context
 
-add ah.taskScheduler : org.activehome.service.task.TaskScheduler/0.0.1-SNAPSHOT
+add ah.taskScheduler : org.activehome.task.TaskScheduler/0.0.1-SNAPSHOT
 add chan_toSchedule_taskScheduler : AsyncBroadcast
 add chan_toExecute_taskScheduler : AsyncBroadcast
 
@@ -51,7 +51,7 @@ bind ah.solarGenMeter.toSchedule chan_toSchedule_taskScheduler
 bind ah.solarGenMeter.toExecute chan_toExecute_taskScheduler
 bind ah.solarGenMeter.pushNotif chan_getNotif_context
 
-add ah.predictor : org.activehome.energy.prediction.SolarGenerationPredictor/0.0.1-SNAPSHOT
+add ah.predictor : org.activehome.energy.predictor.SolarGenerationPredictor/0.0.1-SNAPSHOT
 set ah.predictor.metric = "prediction.energy.gen"
 set ah.predictor.actualMetric = "energy.gen"
 set ah.predictor.discrete = "true"
@@ -69,7 +69,7 @@ add chan_getResponse_predictor : AsyncBroadcast
 bind ah.predictor.getResponse chan_getResponse_predictor
 bind ah.context.pushResponse chan_getResponse_predictor
 
-add ah.tester : org.activehome.energy.prediction.test.TesterSolarGenerationPredictor/0.0.1-SNAPSHOT
+add ah.tester : org.activehome.energy.predictor.test.TesterSolarGenerationPredictor/0.0.1-SNAPSHOT
 set ah.tester.startDate = "2013-07-24 00:00:00"
 set ah.tester.testDuration = "86400000"
 bind ah.tester.time chan_tic_timekeeper
