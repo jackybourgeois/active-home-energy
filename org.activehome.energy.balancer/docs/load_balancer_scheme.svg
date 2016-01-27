@@ -13,8 +13,11 @@
    height="300"
    id="svg6430"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="New document 32">
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="load_balancer_scheme.svg"
+   inkscape:export-filename="E:\github\activehome-energy\org.activehome.energy.balancer\docs\load_balancer_scheme.png"
+   inkscape:export-xdpi="200"
+   inkscape:export-ydpi="200">
   <defs
      id="defs6432">
     <marker
@@ -95,17 +98,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.35"
-     inkscape:cx="375"
-     inkscape:cy="177.14286"
+     inkscape:zoom="1.4"
+     inkscape:cx="318.60245"
+     inkscape:cy="159.38961"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="483"
-     inkscape:window-height="383"
-     inkscape:window-x="1117"
-     inkscape:window-y="24"
-     inkscape:window-maximized="0" />
+     inkscape:window-width="1600"
+     inkscape:window-height="837"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
   <metadata
      id="metadata6435">
     <rdf:RDF>
@@ -114,7 +117,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
