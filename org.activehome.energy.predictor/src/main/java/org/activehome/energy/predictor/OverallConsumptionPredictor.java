@@ -55,6 +55,18 @@ import java.util.Map;
 @ComponentType
 public class OverallConsumptionPredictor extends Predictor {
 
+    @Param(defaultValue = "Predict the overall electricity consumption.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor/docs/overallConsumptionPredictor.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor/docs/overallConsumptionPredictor.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor/docs/overallConsumptionPredictor.kevs")
+    private String demoScript;
+
     /**
      * Number of days to use for the prediction.
      */

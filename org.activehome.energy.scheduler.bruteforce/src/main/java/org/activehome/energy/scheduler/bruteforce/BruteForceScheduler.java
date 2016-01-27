@@ -66,6 +66,18 @@ import java.util.*;
 @ComponentType
 public class BruteForceScheduler extends Service implements RequestHandler {
 
+    @Param(defaultValue = "Use exhaustive search to find alternative schedule of interactive appliance's loads.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.scheduler.bruteforce/docs/bruteForceScheduler.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.scheduler.bruteforce/docs/bruteForceScheduler.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.scheduler.bruteforce/docs/bruteForceScheduler.kevs")
+    private String demoScript;
+
     @Param(defaultValue = "pushRequest>TimeKeeper.getRequest,"
             + "getResponse>TimeKeeper.pushResponse,"
             + "getNotif>Context.pushNotif,"

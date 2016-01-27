@@ -53,16 +53,26 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Background device emulator based on actual data.
- * - Commands: START, STOP, STATUS
- * - Status: ON, OFF, LOCKED_ON
- * - Publish: status, current power
+ *
  *
  * @author Jacky Bourgeois
  * @version %I%, %G%
  */
 @ComponentType
 public class EBackgroundApp extends BackgroundAppliance {
+
+    @Param(defaultValue = "Background device emulator based on actual data.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eBackgroundAppliance.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eBackgroundAppliance.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/EBackground.kevs")
+    private String demoScript;
+
     /**
      * Commands.
      */

@@ -51,6 +51,19 @@ import java.util.*;
 @ComponentType
 public class EGridCarbonIntensityPredictor extends Predictor {
 
+    @Param(defaultValue = "This predictor relies on actual data to emulate a prediction" +
+            " of the grid carbon intensity.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator/docs/eGridCarbonIntensityPredictor.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator/docs/eGridCarbonIntensityPredictor.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator/docs/eGridCarbonIntensityPredictor.kevs")
+    private String demoScript;
+
     /**
      * Source of the data.
      */

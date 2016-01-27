@@ -52,6 +52,18 @@ import java.util.stream.Collectors;
 @ComponentType
 public class EnergyEvaluator extends Evaluator {
 
+    @Param(defaultValue = "Perform an evaluation of electricity flows in the household.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.evaluator.energy/docs/energy.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.evaluator.energy/docs/energyEvaluator.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.evaluator.energy/docs/demo.kevs")
+    private String demoScript;
+
     /**
      * The necessary bindings.
      */

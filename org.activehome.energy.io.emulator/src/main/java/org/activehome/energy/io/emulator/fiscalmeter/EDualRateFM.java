@@ -35,6 +35,18 @@ import java.util.concurrent.TimeUnit;
 @ComponentType
 public class EDualRateFM extends EFiscalMeter {
 
+    @Param(defaultValue = "Emulate a fiscal meter delivering a dual energy rate (such as Night/Day).")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eDualRateFM.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eDualRateFM.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/demo.kevs")
+    private String demoScript;
+
     /**
      * The high rate
      */

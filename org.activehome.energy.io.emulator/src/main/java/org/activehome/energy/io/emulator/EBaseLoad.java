@@ -61,15 +61,24 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Emulate a load based on the overall consumption
- * minus the considered appliances to compensate
- * load that are not measured.
- *
  * @author Jacky Bourgeois
  * @version %I%, %G%
  */
 @ComponentType
 public class EBaseLoad extends BackgroundAppliance {
+
+    @Param(defaultValue = "Emulate a load based on the overall consumption minus the considered appliances to compensate load that are not measured.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eBaseLoad.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eBaseLoad.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/EBaseLoad.kevs")
+    private String demoScript;
+
     /**
      * Commands.
      */

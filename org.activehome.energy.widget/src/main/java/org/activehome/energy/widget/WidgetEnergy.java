@@ -26,6 +26,7 @@ package org.activehome.energy.widget;
 
 
 import org.kevoree.annotation.ComponentType;
+import org.kevoree.annotation.Param;
 
 /**
  * @author Jacky Bourgeois
@@ -34,5 +35,16 @@ import org.kevoree.annotation.ComponentType;
 @ComponentType
 public class WidgetEnergy {
 
+    @Param(defaultValue = "A set of widgets related to energy.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.widget/docs/widgetEnergy.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.widget/docs/widgetEnergy.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.widget/docs/widgetEnergy.kevs")
+    private String demoScript;
 
 }

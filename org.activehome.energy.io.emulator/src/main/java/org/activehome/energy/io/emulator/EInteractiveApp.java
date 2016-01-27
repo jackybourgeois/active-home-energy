@@ -42,16 +42,24 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Interactive device emulator.
- * - Commands: SET, START, STOP, PAUSE, RESUME, STATUS
- * - Status: READY, RUNNING, DONE
- * - Publish: status, current power
- *
  * @author Jacky Bourgeois
  * @version %I%, %G%
  */
 @ComponentType
 public class EInteractiveApp extends InteractiveAppliance {
+
+    @Param(defaultValue = "Interactive device emulator.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eGrid.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eGrid.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/EGrid.kevs")
+    private String demoScript;
+
     /**
      * Commands.
      */

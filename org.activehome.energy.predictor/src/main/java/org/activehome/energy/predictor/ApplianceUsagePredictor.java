@@ -34,6 +34,7 @@ import org.activehome.service.Service;
 import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.KevoreeInject;
+import org.kevoree.annotation.Param;
 import org.kevoree.annotation.Start;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.UUIDModel;
@@ -62,6 +63,18 @@ import java.util.TimeZone;
 @ComponentType
 public final class ApplianceUsagePredictor
         extends Service implements RequestHandler {
+
+    @Param(defaultValue = "Predict the appliance usage.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor/docs/applianceUsagePredictor.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor/docs/applianceUsagePredictor.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor/docs/applianceUsagePredictor.kevs")
+    private String demoScript;
 
     /**
      * The Kevoree model.

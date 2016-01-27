@@ -52,6 +52,19 @@ import java.util.concurrent.TimeUnit;
  */
 @ComponentType
 public class EMicroGeneration extends MicroGeneration {
+
+    @Param(defaultValue = "Emulate a micro-generation based on actual data.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eMicroGeneration.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eMicroGeneration.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/EMicroGeneration.kevs")
+    private String demoScript;
+
     /**
      * Commands.
      */

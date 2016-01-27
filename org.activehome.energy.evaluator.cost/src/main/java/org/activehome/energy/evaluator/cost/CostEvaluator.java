@@ -50,6 +50,18 @@ import java.util.HashMap;
 @ComponentType
 public class CostEvaluator extends Evaluator {
 
+    @Param(defaultValue = "Perform an evaluation of the financial cost of electricity for the household.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.evaluator.cost/docs/cost.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.evaluator.cost/docs/costEvaluator.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.evaluator.cost/docs/demo.kevs")
+    private String demoScript;
+
     /**
      * The necessary bindings.
      */

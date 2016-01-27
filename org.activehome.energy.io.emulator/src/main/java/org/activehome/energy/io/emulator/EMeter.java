@@ -48,13 +48,24 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Emulate a meter based on actual data.
- *
  * @author Jacky Bourgeois
  * @version %I%, %G%
  */
 @ComponentType
 public class EMeter extends Meter {
+
+    @Param(defaultValue = "Emulate a meter based on actual data.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eMeter.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eMeter.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/EMeter.kevs")
+    private String demoScript;
+
     /**
      * Commands.
      */

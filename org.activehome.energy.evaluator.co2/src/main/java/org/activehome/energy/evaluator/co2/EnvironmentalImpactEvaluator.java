@@ -51,6 +51,18 @@ import java.util.HashMap;
 @ComponentType
 public class EnvironmentalImpactEvaluator extends Evaluator {
 
+    @Param(defaultValue = "Perform an evaluation of the environmental impact (CO2) of the household's electricity system.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.evaluator.co2/docs/co2.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.evaluator.co2/docs/environmentalImpactEvaluator.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.evaluator.co2/docs/demo.kevs")
+    private String demoScript;
+
     /**
      * The necessary bindings.
      */

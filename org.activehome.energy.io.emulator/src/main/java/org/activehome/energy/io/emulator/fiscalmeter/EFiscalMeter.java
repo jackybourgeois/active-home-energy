@@ -40,7 +40,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  * @version %I%, %G%
  */
 @ComponentType
-public class EFiscalMeter extends IO {
+public abstract class EFiscalMeter extends IO {
 
     /**
      * label of the metric attached to the published value

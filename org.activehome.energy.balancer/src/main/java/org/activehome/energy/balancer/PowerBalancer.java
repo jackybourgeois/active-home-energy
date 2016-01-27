@@ -61,14 +61,25 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * The Balancer is a reactive component which tends to optimize the
- * overall consumption of a household at real time towards an objective.
- *
  * @author Jacky Bourgeois
  * @version %I%, %G%
  */
 @ComponentType
 public class PowerBalancer extends Service implements RequestHandler {
+
+
+    @Param(defaultValue = "The Balancer is a reactive component which tends to optimize the\n" +
+            " * overall consumption of a household at real time towards an objective.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.balancer/docs/load_balancer_scheme.svg")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.balancer/docs/powerBalancer.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.balancer/docs/demo.kevs")
+    private String demoScript;
 
     private static final long DEFAULT_PAUSE_TIME = 900000;
 

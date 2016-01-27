@@ -33,13 +33,23 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Emulate a fiscal meter delivering a constant energy rate
- *
  * @author Jacky Bourgeois
  * @version %I%, %G%
  */
 @ComponentType
 public class EConstantFM extends EFiscalMeter {
+
+    @Param(defaultValue = "Emulate a fiscal meter delivering a constant energy rate.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eConstantFM.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eConstantFM.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/demo.kevs")
+    private String demoScript;
 
     /**
      * The constant rate

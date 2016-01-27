@@ -48,13 +48,23 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 /**
- * Provide real information (every 30 minutes) on UK grid status.
- *
  * @author Jacky Bourgeois
  * @version %I%, %G%
  */
 @ComponentType
 public class UKGrid extends IO {
+
+    @Param(defaultValue = "Provide real information (every 30 minutes) on UK grid status.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.grid/docs/grid.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.grid/docs/grid.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.grid/docs/demo.kevs")
+    private String demoScript;
 
     private final static String URL_SRC_UK = "http://www.bmreports.com"
             + "/bsp/additional/saveoutput.php"

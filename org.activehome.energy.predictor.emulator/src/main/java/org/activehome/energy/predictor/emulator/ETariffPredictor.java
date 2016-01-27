@@ -31,6 +31,7 @@ import org.activehome.energy.library.record.TariffRecord;
 import org.activehome.predictor.Predictor;
 import org.activehome.time.TimeControlled;
 import org.kevoree.annotation.ComponentType;
+import org.kevoree.annotation.Param;
 
 /**
  * @author Jacky Bourgeois
@@ -38,6 +39,18 @@ import org.kevoree.annotation.ComponentType;
  */
 @ComponentType
 public class ETariffPredictor extends Predictor {
+
+    @Param(defaultValue = "Predict the electricity tariff rates for the given time frame.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator/docs/eTariffPredictor.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator/docs/eTariffPredictor.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator/docs/eTariffPredictor.kevs")
+    private String demoScript;
 
     /**
      * Predict the electricity tariff rates for the given time frame.

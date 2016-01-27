@@ -63,6 +63,18 @@ import java.util.LinkedList;
 @ComponentType
 public class Planner extends Service implements RequestHandler {
 
+    @Param(defaultValue = "Define the expected plan in collaboration with the user.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.planner/docs/planner.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.planner/docs/grid.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.planner/docs/demo.kevs")
+    private String demoScript;
+
     @Param(defaultValue = "getNotif>Context.pushNotif,"
             + "getNotif>Context.pushDataToSystem,"
             + "pushUserSuggestion>User.getNotif,"

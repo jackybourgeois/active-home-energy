@@ -47,14 +47,26 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Emulate the electricity grid status: percentage and carbon
- * intensity of each source based on actual data.
+ *
  *
  * @author Jacky Bourgeois
  * @version %I%, %G%
  */
 @ComponentType
 public class EGrid extends IO {
+
+    @Param(defaultValue = "Emulate the electricity grid status: percentage and carbon intensity of each source based on actual data.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eGrid.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/eGrid.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/EGrid.kevs")
+    private String demoScript;
+
     /**
      * Commands.
      */

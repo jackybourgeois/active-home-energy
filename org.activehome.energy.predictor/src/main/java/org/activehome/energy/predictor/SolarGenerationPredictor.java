@@ -60,6 +60,18 @@ import java.util.Map;
 @ComponentType
 public class SolarGenerationPredictor extends Predictor {
 
+    @Param(defaultValue = "Predict the solar generation.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor/docs/solarGenerationPredictor.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor/docs/solarGenerationPredictor.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor/docs/solarGenerationPredictor.kevs")
+    private String demoScript;
+
     /**
      * Number of days to use for the prediction.
      */

@@ -66,20 +66,27 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This predictor relies on actual data to emulate a prediction
- * of each appliance, baseload and meter on the platform.
- *
  * @author Jacky Bourgeois
  * @version %I%, %G%
  */
 @ComponentType
 public class EApplianceUsagePredictor extends Predictor {
 
+    @Param(defaultValue = "This predictor relies on actual data to emulate a prediction" +
+            " of each appliance, baseload and meter on the platform.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator/docs/eApplianceUsagePredictor.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator/docs/eApplianceUsagePredictor.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator/docs/eApplianceUsagePredictor.kevs")
+    private String demoScript;
+
     @Param
     private String metrics;
-    @Param(defaultValue = "This predictor relies on actual data to emulate a prediction"
-            + " of each appliance, baseload and meter on the platform.")
-    private String description;
     /**
      * Source of the data.
      */

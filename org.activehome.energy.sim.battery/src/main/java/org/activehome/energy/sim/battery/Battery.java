@@ -50,6 +50,18 @@ import org.kevoree.log.Log;
 @ComponentType
 public class Battery extends Storage {
 
+    @Param(defaultValue = "Simulate an electrical storage.")
+    private String description;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.sim.battery/docs/battery.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.sim.battery/docs/battery.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.sim.battery/docs/main.kevs")
+    private String demoScript;
+
     /**
      * Frequency of computation/notification if no IO
      * in milliseconds.
