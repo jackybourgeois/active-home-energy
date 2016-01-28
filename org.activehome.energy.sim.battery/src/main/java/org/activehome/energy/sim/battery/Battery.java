@@ -62,6 +62,9 @@ public class Battery extends Storage {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.sim.battery/docs/main.kevs")
     private String demoScript;
 
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.sim.battery")
+    private String src;
+
     /**
      * Frequency of computation/notification if no IO
      * in milliseconds.

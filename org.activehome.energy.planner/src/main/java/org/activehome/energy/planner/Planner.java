@@ -75,6 +75,9 @@ public class Planner extends Service implements RequestHandler {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.planner/docs/demo.kevs")
     private String demoScript;
 
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.planner")
+    private String src;
+
     @Param(defaultValue = "getNotif>Context.pushNotif,"
             + "getNotif>Context.pushDataToSystem,"
             + "pushUserSuggestion>User.getNotif,"

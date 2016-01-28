@@ -79,6 +79,9 @@ public class EBaseLoad extends BackgroundAppliance {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/EBaseLoad.kevs")
     private String demoScript;
 
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator")
+    private String src;
+
     /**
      * Commands.
      */

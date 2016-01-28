@@ -63,6 +63,9 @@ public class EnvironmentalImpactEvaluator extends Evaluator {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.evaluator.co2/docs/demo.kevs")
     private String demoScript;
 
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.evaluator.co2")
+    private String src;
+
     /**
      * The necessary bindings.
      */

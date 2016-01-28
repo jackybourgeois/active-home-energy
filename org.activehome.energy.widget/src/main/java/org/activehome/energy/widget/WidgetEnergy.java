@@ -47,4 +47,8 @@ public class WidgetEnergy {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.widget/docs/widgetEnergy.kevs")
     private String demoScript;
 
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.widget")
+    private String src;
+
+
 }

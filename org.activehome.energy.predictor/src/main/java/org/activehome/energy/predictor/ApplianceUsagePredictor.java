@@ -76,6 +76,9 @@ public final class ApplianceUsagePredictor
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor/docs/applianceUsagePredictor.kevs")
     private String demoScript;
 
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor")
+    private String src;
+
     /**
      * The Kevoree model.
      */

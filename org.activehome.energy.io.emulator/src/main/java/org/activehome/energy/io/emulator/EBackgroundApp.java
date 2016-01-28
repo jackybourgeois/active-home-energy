@@ -73,6 +73,9 @@ public class EBackgroundApp extends BackgroundAppliance {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/EBackground.kevs")
     private String demoScript;
 
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator")
+    private String src;
+
     /**
      * Commands.
      */

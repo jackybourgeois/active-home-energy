@@ -66,6 +66,9 @@ public class UKGrid extends IO {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.grid/docs/demo.kevs")
     private String demoScript;
 
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.grid")
+    private String src;
+
     private final static String URL_SRC_UK = "http://www.bmreports.com"
             + "/bsp/additional/saveoutput.php"
             + "?element=generationbyfueltypetablehistoric&output=CSV";

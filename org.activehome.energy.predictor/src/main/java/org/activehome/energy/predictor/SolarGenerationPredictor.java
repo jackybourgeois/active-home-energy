@@ -72,6 +72,9 @@ public class SolarGenerationPredictor extends Predictor {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor/docs/solarGenerationPredictor.kevs")
     private String demoScript;
 
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor")
+    private String src;
+
     /**
      * Number of days to use for the prediction.
      */

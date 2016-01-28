@@ -85,6 +85,9 @@ public class EApplianceUsagePredictor extends Predictor {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator/docs/eApplianceUsagePredictor.kevs")
     private String demoScript;
 
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator")
+    private String src;
+
     @Param
     private String metrics;
     /**

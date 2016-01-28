@@ -67,6 +67,9 @@ public class OverallConsumptionPredictor extends Predictor {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor/docs/overallConsumptionPredictor.kevs")
     private String demoScript;
 
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor")
+    private String src;
+
     /**
      * Number of days to use for the prediction.
      */

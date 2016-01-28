@@ -51,6 +51,9 @@ public class EConstantFM extends EFiscalMeter {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/demo.kevs")
     private String demoScript;
 
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator")
+    private String src;
+
     /**
      * The constant rate
      */

@@ -52,6 +52,9 @@ public class ETariffPredictor extends Predictor {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator/docs/eTariffPredictor.kevs")
     private String demoScript;
 
+    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator")
+    private String src;
+
     /**
      * Predict the electricity tariff rates for the given time frame.
      *
