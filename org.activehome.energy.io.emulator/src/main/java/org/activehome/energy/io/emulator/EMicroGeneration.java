@@ -65,7 +65,7 @@ public class EMicroGeneration extends MicroGeneration {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator/docs/EMicroGeneration.kevs")
     private String demoScript;
 
-    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.io.emulator")
+    @Param(defaultValue = "/activehome-energy/tree/master/org.activehome.energy.io.emulator")
     private String src;
 
     /**

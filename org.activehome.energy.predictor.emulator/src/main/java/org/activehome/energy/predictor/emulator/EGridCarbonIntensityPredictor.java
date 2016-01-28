@@ -64,7 +64,7 @@ public class EGridCarbonIntensityPredictor extends Predictor {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator/docs/eGridCarbonIntensityPredictor.kevs")
     private String demoScript;
 
-    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.predictor.emulator")
+    @Param(defaultValue = "/activehome-energy/tree/master/org.activehome.energy.predictor.emulator")
     private String src;
 
     /**

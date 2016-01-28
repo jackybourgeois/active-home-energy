@@ -64,7 +64,7 @@ public class EnergyEvaluator extends Evaluator {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.evaluator.energy/docs/demo.kevs")
     private String demoScript;
 
-    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.evaluator.energy")
+    @Param(defaultValue = "/activehome-energy/tree/master/org.activehome.energy.evaluator.energy")
     private String src;
 
     /**

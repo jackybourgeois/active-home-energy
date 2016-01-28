@@ -81,7 +81,7 @@ public class PowerBalancer extends Service implements RequestHandler {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.balancer/docs/demo.kevs")
     private String demoScript;
 
-    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.balancer")
+    @Param(defaultValue = "/activehome-energy/tree/master/org.activehome.energy.balancer")
     private String src;
 
     private static final long DEFAULT_PAUSE_TIME = 900000;

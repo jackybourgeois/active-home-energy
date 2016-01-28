@@ -78,7 +78,7 @@ public class BruteForceScheduler extends Service implements RequestHandler {
     @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.scheduler.bruteforce/docs/bruteForceScheduler.kevs")
     private String demoScript;
 
-    @Param(defaultValue = "/activehome-energy/master/org.activehome.energy.scheduler.bruteforce")
+    @Param(defaultValue = "/activehome-energy/tree/master/org.activehome.energy.scheduler.bruteforce")
     private String src;
 
     @Param(defaultValue = "pushRequest>TimeKeeper.getRequest,"
