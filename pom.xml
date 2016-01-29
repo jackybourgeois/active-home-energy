@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.activehome.energy</groupId>
-    <artifactId>org.activehome.energy.root</artifactId>
+    <groupId>org.active-home.energy</groupId>
+    <artifactId>org.active-home.energy.root</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Active Home :: Energy</name>
     <description>Set of Active Home component for energy management</description>
-    <url>https://active-home.org</url>
+    <url>http://active-home.org</url>
 
     <organization>
         <name>Active Home Project</name>
@@ -18,9 +18,9 @@
     </organization>
 
     <scm>
-        <connection>scm:git:git@github.com:jackybourgeois/activehome-energy.git</connection>
-        <developerConnection>scm:git:git@github.com:jackybourgeois/activehome-energy.git</developerConnection>
-        <url>http://github.com/jackybourgeois/activehome-energy.git</url>
+        <connection>scm:git:git@github.com:jackybourgeois/active-home-energy.git</connection>
+        <developerConnection>scm:git:git@github.com:jackybourgeois/active-home-energy.git</developerConnection>
+        <url>http://github.com/jackybourgeois/active-home-energy.git</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -47,20 +47,20 @@
     </developers>
 
     <modules>
-        <module>org.activehome.energy.balancer</module>
-        <module>org.activehome.energy.evaluator.cost</module>
-        <module>org.activehome.energy.evaluator.co2</module>
-        <module>org.activehome.energy.evaluator.energy</module>
-        <module>org.activehome.energy.grid</module>
-        <module>org.activehome.energy.io.emulator</module>
-        <module>org.activehome.energy.library</module>
-        <module>org.activehome.energy.predictor</module>
-        <module>org.activehome.energy.predictor.emulator</module>
-        <module>org.activehome.energy.planner</module>
-        <module>org.activehome.energy.preference</module>
-        <module>org.activehome.energy.sim.battery</module>
-        <module>org.activehome.energy.scheduler.bruteforce</module>
-        <module>org.activehome.energy.widget</module>
+        <module>org.active-home.energy.balancer</module>
+        <module>org.active-home.energy.evaluator.cost</module>
+        <module>org.active-home.energy.evaluator.co2</module>
+        <module>org.active-home.energy.evaluator.energy</module>
+        <module>org.active-home.energy.grid</module>
+        <module>org.active-home.energy.io.emulator</module>
+        <module>org.active-home.energy.library</module>
+        <module>org.active-home.energy.predictor</module>
+        <module>org.active-home.energy.predictor.emulator</module>
+        <module>org.active-home.energy.planner</module>
+        <module>org.active-home.energy.preference</module>
+        <module>org.active-home.energy.sim.battery</module>
+        <module>org.active-home.energy.scheduler.bruteforce</module>
+        <module>org.active-home.energy.widget</module>
     </modules>
 
     <dependencies>
@@ -94,13 +94,9 @@
     </properties>
 
     <distributionManagement>
-        <repository>
-            <id>active-home-internal</id>
-            <url>sftp://active-home.org/maven/repo/internal</url>
-        </repository>
         <snapshotRepository>
-            <id>active-home-snapshots</id>
-            <url>sftp://active-home.org/maven/repo/snapshots</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -108,14 +104,6 @@
         <repository>
             <id>kevoree-oss</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
-        </repository>
-        <repository>
-            <id>active-home-snapshots</id>
-            <url>http://active-home.org:8080/maven/snapshots/</url>
-        </repository>
-        <repository>
-            <id>active-home-internal</id>
-            <url>http://active-home.org:8080/maven/internal/</url>
         </repository>
     </repositories>
 
@@ -129,14 +117,52 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.1.2</version>
+                <version>2.2.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
                         <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
                             <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -162,7 +188,7 @@
                         <phase>process-sources</phase>
                         <configuration>
                             <licenseName>gpl_v3</licenseName>
-                            <organizationName>org.activehome</organizationName>
+                            <organizationName>Active Home Project</organizationName>
                             <inceptionYear>2016</inceptionYear>
                             <roots>
                                 <root>src/main/java</root>

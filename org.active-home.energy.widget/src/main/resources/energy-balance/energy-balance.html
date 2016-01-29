@@ -1,0 +1,226 @@
+<!--
+  #%L
+  Active Home :: Energy :: Widget Energy
+  $Id:$
+  $HeadURL:$
+  %%
+  Copyright (C) 2016 Active Home Project
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as
+  published by the Free Software Foundation, either version 3 of the 
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public 
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/gpl-3.0.html>.
+  #L%
+  -->
+<polymer-element name="energy-balance" extends="my-widget">
+
+    <template>
+        <svg id="chart"  viewBox="0 0 450 220" xmlns="http://www.w3.org/2000/svg" style="height:100%;width:100%"
+             xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+            <style>
+                .tic { opacity: 0.7; fill: #ffffff; }
+                .section { fill-opacity: 1; stroke: #000000; stroke-width: 2; stroke-linejoin: round;  stroke-miterlimit: 4; stroke-opacity: 1;}
+                .s1{ fill:#2d2c35; stroke-width:0.1; stroke:#000; }
+                .s2{ fill:#ccc; stroke-width:0.1; stroke:#000; }
+                .s3{ fill:#4d4d4d; stroke-width:0.1; stroke:#000; }
+                .s4{ fill:#e6e6e6; stroke-width:0.1; stroke:#000; }
+                .s5{ fill:#ececec; stroke-width:0.1; stroke:#000; }
+                .s6{ fill:#b3b3b3; stroke-width:0.1; stroke:#000; }
+            </style>
+            <defs id="defs3103">
+                <radialGradient id="gradRed" fx="5%" fy="5%" r="65%" spreadMethod="pad">
+                    <stop offset="0%" stop-color="#cc0000" stop-opacity="1"/>
+                    <stop offset="100%" stop-color="#440000" stop-opacity="1"/>
+                </radialGradient>
+                <radialGradient id="gradLightGreen" fx="5%" fy="5%" r="65%" spreadMethod="pad">
+                    <stop offset="0%" stop-color="#99ffbb" stop-opacity="1"/>
+                    <stop offset="100%" stop-color="#33aa66" stop-opacity="1"/>
+                </radialGradient>
+                <radialGradient id="gradDarkGreen" fx="5%" fy="5%" r="65%" spreadMethod="pad">
+                    <stop offset="0%" stop-color="#00ee00" stop-opacity="1"/>
+                    <stop offset="100%" stop-color="#006600" stop-opacity="1"/>
+                </radialGradient>
+                <radialGradient id="gradBlack" fx="5%" fy="5%" r="65%" spreadMethod="pad">
+                    <stop offset="0%" stop-color="#666666" stop-opacity="1"/>
+                    <stop offset="100%" stop-color="#000000" stop-opacity="1"/>
+                </radialGradient>
+                <radialGradient id="pvShadow" cx="461.5" cy="69.2" fx="461.5" fy="69.2" r="20.6" gradientTransform="matrix(1.4035088,0,0,1.0389611,-184.3233,-6.7139797)" gradientUnits="userSpaceOnUse"/>
+            </defs>
+            <path class="section" id="rightSection"/>
+            <path class="section" id="leftSection"/>
+            <path class="section" id="middleSection" style="stroke:#ffffff;"/>
+            <path class="section" id="border" style="fill-opacity:0;"
+                  d="M 220,220 L 32.06147584281834,151.59597133486625 A 200,200 0 0 1 407.93852415718163,151.59597133486625 Z"/>
+            <rect ry="15" rx="15" y="30" x="220" height="40" width="10" id="tic1" class="tic"
+                  transform="rotate(-60,220,220)"/>
+            <rect ry="15" rx="15" y="30" x="220" height="20" width="10" id="tic2" class="tic"
+                  transform="rotate(-50,220,220)"/>
+            <rect ry="15" rx="15" y="30" x="220" height="20" width="10" id="tic3" class="tic"
+                  transform="rotate(-40,220,220)"/>
+            <rect ry="15" rx="15" y="30" x="220" height="40" width="10" id="tic4" class="tic"
+                  transform="rotate(-30,220,220)"/>
+            <rect ry="15" rx="15" y="30" x="220" height="20" width="10" id="tic5" class="tic"
+                  transform="rotate(-20,220,220)"/>
+            <rect ry="15" rx="15" y="30" x="220" height="20" width="10" id="tic6" class="tic"
+                  transform="rotate(-10,220,220)"/>
+            <rect ry="15" rx="15" y="30" x="220" height="40" width="10" id="tic7" class="tic"
+                  transform="rotate(0,220,220)"/>
+            <rect ry="15" rx="15" y="30" x="220" height="20" width="10" id="tic8" class="tic"
+                  transform="rotate(10,220,220)"/>
+            <rect ry="15" rx="15" y="30" x="220" height="20" width="10" id="tic9" class="tic"
+                  transform="rotate(20,220,220)"/>
+            <rect ry="15" rx="15" y="30" x="220" height="40" width="10" id="tic10" class="tic"
+                  transform="rotate(30,220,220)"/>
+            <rect ry="15" rx="15" y="30" x="220" height="20" width="10" id="tic11" class="tic"
+                  transform="rotate(40,220,220)"/>
+            <rect ry="15" rx="15" y="30" x="220" height="20" width="10" id="tic12" class="tic"
+                  transform="rotate(50,220,220)"/>
+            <rect ry="15" rx="15" y="30" x="220" height="40" width="10" id="tic13" class="tic"
+                  transform="rotate(60,220,220)"/>
+        </svg>
+    </template>
+
+    <script>
+        Polymer('energy-balance', {
+            gen: {value: "0", metricId: "power.gen", ts: 0},
+            cons: {value: "0", metricId: "power.cons", ts: 0},
+
+            ready: function () {
+
+            },
+
+            init: function (attributes, data) {
+                this.data = data;
+                if (data != null) {
+                    for (key in data) {
+                        document.querySelector("web-socket").subscribe(this.id, key);
+                        switch (key) {
+                            case "power.cons":
+                                if (data[key]!="") this.cons =data[key];
+                                break;
+                            case "power.gen":
+                                if (data[key]!="") this.gen =data[key];
+                                break;
+                        }
+                        this.updatePieChart();
+                    }
+                }
+            },
+
+            input: function (json) {
+                if (json.hasOwnProperty("content")) {
+                    switch (json.content.metricId) {
+                        case "power.cons":
+                            this.cons = json.content;
+                            break;
+                        case "power.gen":
+                            this.gen = json.content;
+                            break;
+                    }
+                }
+                this.updatePieChart();
+            },
+
+            updatePieChart: function () {
+                var consumption = parseFloat(this.cons.value);
+                var generation = parseFloat(this.gen.value);
+
+                // Locate canvas if specified by id instead of element
+                canvas = this.shadowRoot.querySelector("#chart");
+                var cx = 220;
+                var cy = 220;
+                var r = 200;
+
+                var sections = ['leftSection', 'middleSection', 'rightSection'];
+
+                var colors;
+                var data;
+                if (consumption > 4500) consumption = 4500;
+                if (consumption > generation) {
+                    data = [generation, consumption - generation, 4500 - consumption];
+                    colors = ['url(#gradDarkGreen)', 'url(#gradRed)', 'url(#gradBlack)'];
+                } else {
+                    data = [consumption, generation - consumption, 4500 - generation];
+                    colors = ['url(#gradDarkGreen)', 'url(#gradLightGreen)', 'url(#gradBlack)'];
+                }
+
+                // Add up the data values so we know how big the pie is
+                var total = 0;
+                for (var i = 0; i < data.length; i++) total += data[i];
+
+                // Now figure out how big each slice of pie is.  Angles in radians.
+                var angles = []
+                for (var i = 0; i < data.length; i++) angles[i] = data[i] / total * (Math.PI - (40 * Math.PI / 180));
+
+                // Loop through each slice of pie.
+                // start at -PI/2+20deg
+                var startAngle = (-Math.PI / 2) + (20 * Math.PI / 180);
+                for (var i = 0; i < data.length; i++) {
+                    // This is where the wedge ends
+                    var endAngle = startAngle + angles[i];
+
+                    var x1 = cx + r * Math.sin(startAngle);
+                    var y1 = cy - r * Math.cos(startAngle);
+                    var x2 = cx + r * Math.sin(endAngle);
+                    var y2 = cy - r * Math.cos(endAngle);
+
+                    // We describe a wedge with an <svg:path> element
+                    // Notice that we create this with createElementNS()
+                    var path = this.shadowRoot.querySelector("#" + sections[i]);
+
+                    // This string holds the path details
+                    var d = "M " + cx + "," + cy +  // Start at circle center
+                            " L " + x1 + "," + y1 +     // Draw line to (x1,y1)
+                            " A " + r + "," + r +       // Draw an arc of radius r
+                            " 0 0 1 " +       // Arc details...
+                            x2 + "," + y2 +             // Arc goes to to (x2,y2)
+                            " Z";                       // Close path back to (cx,cy)
+                    // This is an XML element, so all attributes must be set
+                    // with setAttribute().  We can't just use JavaScript properties
+                    path.setAttribute("d", d);              // Set this path
+                    path.setAttribute("fill", colors[i]);   // Set wedge color
+                    //path.setAttribute("stroke", "black");   // Outline wedge in black
+                    //path.setAttribute("stroke-width", "2"); // 2 units thick
+                    //path.setAttribute("stroke-linejoin","round");
+                    //canvas.appendChild(path);               // Add wedge to canvas
+
+                    // The next wedge begins where this one ends
+                    startAngle = endAngle;
+                }
+
+                //var d = "M 220,220 L " + (220+200*Math.sin((-Math.PI/2) + (20*Math.PI/180))) + "," + (220-200*Math.cos((-Math.PI/2) + (20*Math.PI/180))) +
+                //        " A 200,200 0 0 1 " +  (220+200*Math.sin(70*Math.PI/180)) + "," + (220-200*Math.cos(70*Math.PI/180)) + " Z";
+                //	alert(d);
+            },
+
+            click: function () {
+
+            },
+
+            resize_start: function (e, ui, widget, grid) {
+
+            },
+
+            resize_stop: function (e, ui, widget, grid) {
+
+            },
+
+            drag_start: function (e, ui, widget, grid) {
+
+            },
+
+            drag_stop: function (e, ui, widget, grid) {
+
+            }
+        });
+    </script>
+</polymer-element>

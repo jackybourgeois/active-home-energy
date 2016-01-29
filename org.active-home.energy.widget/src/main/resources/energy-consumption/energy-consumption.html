@@ -1,0 +1,141 @@
+<!--
+  #%L
+  Active Home :: Energy :: Widget Energy
+  $Id:$
+  $HeadURL:$
+  %%
+  Copyright (C) 2016 Active Home Project
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as
+  published by the Free Software Foundation, either version 3 of the 
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public 
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/gpl-3.0.html>.
+  #L%
+  -->
+<polymer-element name="energy-consumption" extends="my-widget">
+
+    <template>
+        <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg"
+             xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 500 500" style="width: 100%; height: 100%" id="svg2" version="1.1">
+            <style>
+                .panel{ fill:#2d2c35; stroke-miterlimit:4; stroke-width:0.3; stroke:#000; }
+            </style>
+            <defs id="defs4">
+                <linearGradient xlink:href="#linearGradient3971-3-0-5-8" id="linearGradient6047" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.50425012,0,0,0.50432477,143.47299,590.72344)" x1="360.62" y1="195.75" x2="-32.32" y2="64.43"/>
+                <linearGradient id="linearGradient3971-3-0-5-8">
+                    <stop offset="0" id="stop3973-7-2-2-2" style="stop-color:#ff0000;stop-opacity:1"/>
+                    <stop offset="1" id="stop3975-1-0-1-4" style="stop-color:#ff472a;stop-opacity:1"/>
+                </linearGradient>
+            </defs>
+            <g id="layer1" transform="translate(0,-552.36216)">
+                <g id="house">
+                    <path d="M14.25 921.33 329.52 1040.27 489.06 965.08 452.15 727.15 489.84 716.96 356.39 587.56 239.39 562.3 16.65 669.83 58.03 683.07Z" id="path5325-5" style="fill:#463b3b;stroke-width:0.12;stroke:#000"/>
+                    <path d="M60.91 684.94 16.68 918.55 328.51 1036.71 486.23 963.16 449.09 727.65 320.22 765.86Z" id="path5327-8" fill="#fc9"/>
+                    <path d="M355.57 589.63 319.71 761.53 484.5 714.92Z" id="path5329-0" fill="#a00"/>
+                    <path d="M23.35 669.37 239.54 563.98 355.58 589.64 319.71 761.53Z" id="path5331-9" fill="url(#linearGradient6047)"/>
+                    <g id="pv">
+                        <path id="path5335-2" d="m106.66 664.67 27.25 8.79 24.84-17.59-27.52-7.62z" class="panel"/>
+                        <path d="m138.94 674.76 27.25 8.79 24.84-17.59-27.52-7.62z" id="path5337-8" class="panel"/>
+                        <path id="path5339-6" d="m170.2 684.84 27.25 8.79 24.84-17.59-27.52-7.62z" class="panel"/>
+                        <path d="m203.48 694.93 27.25 8.79 24.84-17.59-27.52-7.62z" id="path5341-3" class="panel"/>
+                        <path d="m134.9 644.5 27.25 8.79 24.84-17.59-27.52-7.62z" id="path5343-4" class="panel"/>
+                        <path id="path5345-1" d="m167.17 654.58 27.25 8.79 24.84-17.59-27.52-7.62z" class="panel"/>
+                        <path d="m198.44 664.67 27.25 8.79 24.84-17.59-27.52-7.62z" id="path5348-5" class="panel"/>
+                        <path id="path5350-1" d="m231.72 674.76 27.25 8.79 24.84-17.59-27.52-7.62z" class="panel"/>
+                        <path id="path5352-4" d="m162.13 624.32 27.25 8.79 24.84-17.59-27.52-7.62z" class="panel"/>
+                        <path d="m194.4 634.41 27.25 8.79 24.84-17.59-27.52-7.62z" id="path5354-2" class="panel"/>
+                        <path id="path5356-3" d="m225.67 644.5 27.25 8.79 24.84-17.59-27.52-7.62z" class="panel"/>
+                        <path d="m258.95 654.58 27.25 8.79 24.84-17.59-27.52-7.62z" id="path5358-9" class="panel"/>
+                        <path d="m190.37 604.15 27.25 8.79 24.84-17.59-27.52-7.62z" id="path5360-9" class="panel"/>
+                        <path id="path5362-8" d="m222.64 614.24 27.25 8.79 24.84-17.59-27.52-7.62z" class="panel"/>
+                        <path d="m253.91 624.32 27.25 8.79 24.84-17.59-27.52-7.62z" id="path5364-0" class="panel"/>
+                        <path id="path5366-7" d="m287.19 634.41 27.25 8.79 24.84-17.59-27.52-7.62z" class="panel"/>
+                    </g>
+                    <path d="m60.92 683.81-3.65 19.91 262.51 86.28 133.02-39.1-3.84-23.52-130.1 38.14z" id="path5368-3" style="fill:#352c2c;opacity:0.13"/>
+                </g>
+                <text x="415" y="915" id="conVal" style="font-size:150px;text-anchor:end;">-</text>
+                <text x="420" y="915" id="unit" style="font-size:40px;text-anchor:start;">W</text>
+            </g>
+        </svg>
+    </template>
+
+    <script>
+        Polymer('energy-consumption', {
+            cons: {value: "0", metricId: "power.cons", ts: 0},
+            gen: {value: "0", metricId: "power.gen", ts: 0},
+
+            ready: function () {
+
+            },
+
+            init: function (attributes, data) {
+                if (data != null) {
+                    for (key in data) {
+                        document.querySelector("web-socket").subscribe(this.id, key);
+                        switch (key) {
+                            case "power.cons":
+                                if (data[key]!="") this.cons = data[key];
+                                break;
+                            case "power.gen":
+                                if (data[key]!="") this.gen = data[key];
+                                break;
+                        }
+                    }
+                }
+                this.updateValues();
+            },
+
+            input: function (json) {
+                if (json.hasOwnProperty("content")) {
+                    switch (json.content.metricId) {
+                        case "power.cons":
+                            this.cons = json.content;
+                            break;
+                        case "power.gen":
+                            this.gen = json.content;
+                            break;
+                    }
+                }
+                this.updateValues();
+            },
+
+            updateValues: function () {
+                var consumption = parseFloat(this.cons.value);
+                this.shadowRoot.querySelector("#conVal").textContent = consumption.toFixed(0);
+                if (parseFloat(this.gen.value) < consumption) {
+                    this.shadowRoot.querySelector("#conVal").style.fill = "#CC0000";
+                } else {
+                    this.shadowRoot.querySelector("#conVal").style.fill = "#00CC00";
+                }
+            },
+
+            click: function () {
+
+            },
+
+            resize_start: function (e, ui, widget, grid) {
+
+            },
+
+            resize_stop: function (e, ui, widget, grid) {
+
+            },
+
+            drag_start: function (e, ui, widget, grid) {
+//                console.log(ui.position.left);
+            },
+
+            drag_stop: function (e, ui, widget, grid) {
+            }
+        });
+    </script>
+</polymer-element>
