@@ -170,7 +170,6 @@ public class EMicroGeneration extends MicroGeneration {
      *
      * @param startTS start timestamp of the period
      * @param endTS   end timestamp of the period
-     * @return the list of DataPoint to play
      */
     public final void loadData(final long startTS,
                                final long endTS) {
