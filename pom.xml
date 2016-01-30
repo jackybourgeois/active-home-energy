@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.active-home.energy</groupId>
     <artifactId>org.active-home.energy.root</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Active Home :: Energy</name>
     <description>Set of Active Home component for energy management</description>

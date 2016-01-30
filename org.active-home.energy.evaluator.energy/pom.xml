@@ -5,7 +5,7 @@
     <parent>
         <artifactId>org.active-home.energy.root</artifactId>
         <groupId>org.active-home.energy</groupId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.3-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -19,12 +19,12 @@
         <dependency>
             <groupId>org.active-home</groupId>
             <artifactId>org.active-home.evaluator</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.active-home</groupId>
             <artifactId>org.active-home.test</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
