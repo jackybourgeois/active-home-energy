@@ -132,7 +132,7 @@ public class EnergyEvaluator extends Evaluator {
                 reportedMetric.put(metric.replace("power.", "energy."), "0");
             }
         }
-        return new EvaluationReport(reportedMetric, resultSchedule);
+        return new EvaluationReport(getId(), reportedMetric, resultSchedule);
     }
 
     private void evalAndNotifify(Schedule schedule,

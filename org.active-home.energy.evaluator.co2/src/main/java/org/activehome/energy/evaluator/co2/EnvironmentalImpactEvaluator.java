@@ -111,7 +111,7 @@ public class EnvironmentalImpactEvaluator extends Evaluator {
         double carbonIntensity = carbonIntensityMR.sum();
         reportedMetric.put("environmentalImpact.elec.co2", carbonIntensity + "");
 
-        return new EvaluationReport(reportedMetric, resultSchedule);
+        return new EvaluationReport(getId(), reportedMetric, resultSchedule);
     }
 
     private MetricRecord evalCarbonIntensity(final Schedule schedule) {

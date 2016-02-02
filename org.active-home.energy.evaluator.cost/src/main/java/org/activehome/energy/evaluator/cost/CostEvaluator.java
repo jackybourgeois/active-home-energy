@@ -64,17 +64,17 @@ public class CostEvaluator extends Evaluator {
     /**
      * Import energy tariff policy
      */
-    @Param(defaultValue = "org.active-home.energy.library.etp.LinearETP")
+    @Param(defaultValue = "org.activehome.energy.library.etp.LinearETP")
     private String importETP;
     /**
      * Export energy tariff policy
      */
-    @Param(defaultValue = "org.active-home.energy.library.etp.LinearETP")
+    @Param(defaultValue = "org.activehome.energy.library.etp.LinearETP")
     private String exportETP;
     /**
      * Generation energy tariff policy
      */
-    @Param(defaultValue = "org.active-home.energy.library.etp.LinearETP")
+    @Param(defaultValue = "org.activehome.energy.library.etp.LinearETP")
     private String generationETP;
 
     private EnergyTariffPolicy impETP;
@@ -170,7 +170,7 @@ public class CostEvaluator extends Evaluator {
         sendEvalToContext("cost.elec.1d", schedule.getStart(), cost + "",
                 schedule.getHorizon(), exportMR.getMainVersion());
 
-        return new EvaluationReport(reportedMetric, resultSchedule);
+        return new EvaluationReport(getId(), reportedMetric, resultSchedule);
     }
 
     private MetricRecord evalMetric(final Schedule schedule,
