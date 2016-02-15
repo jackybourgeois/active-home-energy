@@ -53,8 +53,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
- *
  * @author Jacky Bourgeois
  * @version %I%, %G%
  */

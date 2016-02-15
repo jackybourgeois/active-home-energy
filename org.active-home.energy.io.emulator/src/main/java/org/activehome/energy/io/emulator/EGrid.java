@@ -174,37 +174,29 @@ public class EGrid extends IO {
 
             long currentTS = 0;
             double carbonIntensity = 0;
-            double percent = 0;
 
             DecimalFormat df = new DecimalFormat("#.###");
-
             while (result.next()) {
-                double val = result.getDouble("value") / 100;
+                double val = result.getDouble("value") / 100.;
                 String metricId = result.getString("metricID");
                 long ts = dfMySQL.parse(result.getString("ts")).getTime();
-
                 if (currentTS != 0 && currentTS != ts) {
                     newData.addLast(new DataPoint("grid.carbonIntensity", currentTS, carbonIntensity + ""));
                     currentTS = ts;
-                    //System.out.print(",\t" + df.format(carbonIntensity) + ",\t" + df.format(percent) + "\n" + strLocalTime(ts));
                     carbonIntensity = 0;
-                    percent = 0;
                 } else if (currentTS == 0) {
                     currentTS = ts;
-                    //System.out.print("\n" + strLocalTime(ts));
                 }
 
                 if (val > 0 && co2Map.containsKey(metricId)) {
                     carbonIntensity += val * co2Map.get(metricId);
-                    percent += val;
-                    //System.out.print(",\t" + metricId + ": " + df.format(val));
                 }
             }
             if (carbonIntensity != 0) {
-                newData.addLast(new DataPoint("carbonIntensity", currentTS, carbonIntensity + ""));
+                newData.addLast(new DataPoint("grid.carbonIntensity", currentTS, carbonIntensity + ""));
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            logError(e.getMessage());
             e.printStackTrace();
         } catch (ParseException e) {
             e.printStackTrace();
