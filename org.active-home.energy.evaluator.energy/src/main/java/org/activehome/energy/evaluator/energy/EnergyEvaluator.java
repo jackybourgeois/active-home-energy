@@ -103,8 +103,12 @@ public class EnergyEvaluator extends Evaluator {
     }
 
     private void getScheduleCorrectedScheduleAndReport(long start, long end, RequestCallback callback) {
+        logInfo("eval after correction, start:" + strLocalTime(start)
+                + ", end: " + strLocalTime(end));
         String[] metrics = new String[METRICS_TO_REPORT.length];
-        for (int i=0;i<METRICS_TO_REPORT.length;i++) metrics[i] = METRICS_TO_REPORT[i] + "#corrected,0";
+        for (int i = 0; i < METRICS_TO_REPORT.length; i++) {
+            metrics[i] = METRICS_TO_REPORT[i] + "#corrected,0";
+        }
         Object[] params = new Object[]{start, end - start, HOUR, metrics};
         Request ctxReq = new Request(getFullId(), getNode() + ".context",
                 getCurrentTime(), "extractSchedule", params);
@@ -132,13 +136,19 @@ public class EnergyEvaluator extends Evaluator {
                 reportedMetric.put(metric.replace("power.", "energy."), "0");
             }
         }
-        return new EvaluationReport(getId(), reportedMetric, resultSchedule);
+
+        EvaluationReport report = new EvaluationReport(getId(),
+                schedule.getMetricRecordMap().get("power.gen").getMainVersion(),
+                reportedMetric, resultSchedule);
+        publishReport(report);
+
+        return report;
     }
 
-    private void evalAndNotifify(Schedule schedule,
-                                 String metric,
-                                 Schedule resultSchedule,
-                                 HashMap<String, String> reportedMetric) {
+    private void evalAndNotifify(final Schedule schedule,
+                                 final String metric,
+                                 final Schedule resultSchedule,
+                                 final HashMap<String, String> reportedMetric) {
         MetricRecord mr = evalMetric(schedule, metric, metric.replace("power.", "energy."));
         resultSchedule.getMetricRecordMap().put(metric.replace("power.", "energy."), mr);
         String metricId = metric.replace("power.", "energy." + getDefaultHorizon() + ".");
@@ -217,7 +227,7 @@ public class EnergyEvaluator extends Evaluator {
                 .collect(Collectors.toCollection(LinkedList::new));
         if (toRemove.size() > 0) {
             MetricRecord correctedMR = new MetricRecord(
-                    solarMR.getMetricId(), solarMR.getTimeFrame());
+                    solarMR.getMetricId(), solarMR.getStartTime(), solarMR.getTimeFrame());
             for (Record record : solarMR.getRecords()) {
                 boolean addValue = true;
                 for (double val : toRemove) {

@@ -31,6 +31,7 @@ import org.activehome.com.Request;
 import org.activehome.com.RequestCallback;
 import org.activehome.com.ShowIfErrorCallback;
 import org.activehome.com.error.Error;
+import org.activehome.context.data.DiscreteDataPoint;
 import org.activehome.context.data.Schedule;
 import org.activehome.context.data.MetricRecord;
 import org.activehome.context.data.Record;
@@ -59,32 +60,25 @@ public class EnvironmentalImpactEvaluator extends Evaluator {
     /**
      * The necessary bindings.
      */
-    @Param(defaultValue = "getNotif>Context.pushDataToSystem")
+    @Param(defaultValue = "getNotif>Evaluator.pushReport")
     private String bindingEnvironmentalImpactEvaluator;
 
     private EvaluationReport lastReport;
 
-    @Start
-    public void start() {
-        super.start();
+    @Override
+    public void onInit() {
+        super.onInit();
         lastReport = null;
     }
-
-    @Override
-    public final void onInit() {
-        Request request = new Request(getFullId(), getNode() + ".context",
-                getCurrentTime(), "subscribe",
-                new Object[]{new String[]{"power.gen.SolarPV"}, getFullId()});
-        sendRequest(request, new ShowIfErrorCallback());
-    }
-
 
     @Override
     public void evaluate(final long startTS,
                          final long endTS,
                          final RequestCallback callback) {
 
-        String[] metrics = new String[]{"power.import", "grid.carbonIntensity"};
+        logInfo("evaluate: " + strLocalTime(startTS) + " to " + strLocalTime(endTS));
+
+        String[] metrics = new String[]{"power.import#corrected,0", "grid.carbonIntensity#corrected,0"};
         Request ctxReq = new Request(getFullId(), getNode() + ".context", getCurrentTime(),
                 "extractSchedule", new Object[]{startTS, endTS - startTS, HOUR, metrics});
         sendRequest(ctxReq, new RequestCallback() {
@@ -110,14 +104,29 @@ public class EnvironmentalImpactEvaluator extends Evaluator {
         resultSchedule.getMetricRecordMap().put("environmentalImpact.elec.co2", carbonIntensityMR);
         double carbonIntensity = carbonIntensityMR.sum();
         reportedMetric.put("environmentalImpact.elec.co2", carbonIntensity + "");
+        sendEvalToContext("environmentalImpact.elec.co2", schedule.getStart(), carbonIntensity + "",
+                schedule.getHorizon(), carbonIntensityMR.getMainVersion());
 
-        return new EvaluationReport(getId(), reportedMetric, resultSchedule);
+        EvaluationReport report = new EvaluationReport(getId(),
+                carbonIntensityMR.getMainVersion(), reportedMetric, resultSchedule);
+        lastReport = report;
+        publishReport(report);
+
+        return report;
+    }
+
+    private void sendEvalToContext(String metricId, long start, String val, long duration,
+                                   String version) {
+        DiscreteDataPoint ddp = new DiscreteDataPoint(metricId, start, val,
+                version, 0, 1, Convert.strDurationToMillisec(getDefaultHorizon()));
+        sendNotif(new Notif(getFullId(), getNode() + ".context",
+                getCurrentTime(), ddp));
     }
 
     private MetricRecord evalCarbonIntensity(final Schedule schedule) {
         MetricRecord importMR = schedule.getMetricRecordMap().get("power.import");
         MetricRecord ciMR = schedule.getMetricRecordMap().get("grid.carbonIntensity");
-        MetricRecord evalMR = new MetricRecord("environmentalImpact.elec.co2", importMR.getTimeFrame());
+        MetricRecord evalMR = new MetricRecord("environmentalImpact.elec.co2.1d", importMR.getTimeFrame());
         if (ciMR.getRecords() != null && ciMR.getRecords().size() > 0
                 && importMR.getRecords() != null && importMR.getRecords().size() > 0) {
             int indexImport = 1;
@@ -135,11 +144,11 @@ public class EnvironmentalImpactEvaluator extends Evaluator {
                     indexCI++;
                     ci = ciMR.getRecords().get(indexCI);
                     double energyKWh = Convert.watt2kWh(prevImport, ci.getTS() - prevTS);
-                    evalMR.addRecord(prevTS, (energyKWh * prevCI) + "", 1);
+                    evalMR.addRecord(prevTS, (energyKWh * prevCI) + "", importMR.getMainVersion(), 1);
                     prevTS = ci.getTS();
                 }
                 double energyKWh = Convert.watt2kWh(prevImport, imp.getTS() - prevTS);
-                evalMR.addRecord(prevTS, (energyKWh * ci.getDouble()) + "", 1);
+                evalMR.addRecord(prevTS, (energyKWh * ci.getDouble()) + "", importMR.getMainVersion(), 1);
                 prevTS = imp.getTS();
                 prevImport = imp.getDouble();
                 indexImport++;
@@ -147,7 +156,7 @@ public class EnvironmentalImpactEvaluator extends Evaluator {
 
             if (schedule.getHorizon() > prevTS) {
                 double energyKWh = Convert.watt2kWh(prevImport, schedule.getHorizon() - prevTS);
-                evalMR.addRecord(prevTS, (energyKWh * ci.getDouble()) + "", 1);
+                evalMR.addRecord(prevTS, (energyKWh * ci.getDouble()) + "", importMR.getMainVersion(), 1);
             }
         }
 
@@ -158,15 +167,16 @@ public class EnvironmentalImpactEvaluator extends Evaluator {
     @Input
     public void getNotif(String notifStr) {
         JsonObject jsonNotif = JsonObject.readFrom(notifStr);
-        if (jsonNotif.get("dest").asString().equals(getFullId())) {
+        if (jsonNotif.get("src").asString().contains("EnergyEvaluator")) {
             Notif notif = new Notif(jsonNotif);
-            if (notif.getContent() instanceof MetricRecord) {
-                MetricRecord mr = (MetricRecord) notif.getContent();
+            if (notif.getContent() instanceof EvaluationReport) {
+                EvaluationReport report = (EvaluationReport) notif.getContent();
 
-                // if pv record has just been corrected, redo the evaluate
-                if (mr.getMetricId().equals("power.gen.SolarPV") && mr.getMainVersion().equals("corrected")) {
+                // if new energy report based on corrected values, redo the evaluate
+                if (report.getVersion().equals("corrected")) {
                     if (lastReport != null) {
-                        evaluate(lastReport.getSchedule().getStart(), lastReport.getSchedule().getHorizon(),
+                        evaluate(lastReport.getSchedule().getStart(),
+                                lastReport.getSchedule().getStart() +  lastReport.getSchedule().getHorizon(),
                                 new ShowIfErrorCallback());
                     }
                 }

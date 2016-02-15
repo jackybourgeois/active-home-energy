@@ -58,7 +58,7 @@ public class CostEvaluator extends Evaluator {
     /**
      * The necessary bindings.
      */
-    @Param(defaultValue = "getNotif>Context.pushDataToSystem")
+    @Param(defaultValue = "getNotif>Evaluator.pushReport")
     private String bindingCostEvaluator;
 
     /**
@@ -86,7 +86,6 @@ public class CostEvaluator extends Evaluator {
     @Start
     public void start() {
         super.start();
-        lastReport = null;
         try {
             impETP = (EnergyTariffPolicy) Class.forName(importETP).newInstance();
             expETP = (EnergyTariffPolicy) Class.forName(exportETP).newInstance();
@@ -101,13 +100,10 @@ public class CostEvaluator extends Evaluator {
     }
 
     @Override
-    public final void onInit() {
-        Request request = new Request(getFullId(), getNode() + ".context",
-                getCurrentTime(), "subscribe",
-                new Object[]{new String[]{"power.gen.SolarPV"}, getFullId()});
-        sendRequest(request, new ShowIfErrorCallback());
+    public void onInit() {
+        super.onInit();
+        lastReport = null;
     }
-
 
     @Override
     public void evaluate(final long startTS,
@@ -141,6 +137,11 @@ public class CostEvaluator extends Evaluator {
         HashMap<String, String> reportedMetric = new HashMap<>();
         Schedule resultSchedule = new Schedule(schedule);
 
+        logError("## gen main versions: " + schedule.getMetricRecordMap().get("power.gen").getMainVersion());
+        for (String vers : schedule.getMetricRecordMap().get("power.gen").getAllVersionRecords().keySet()) {
+            logError("## gen versions: " + vers);
+        }
+
         MetricRecord importMR = evalMetric(schedule, impETP, "power.import",
                 "tariff.elec.import", "cost.elec.import");
         resultSchedule.getMetricRecordMap().put("cost.elec.import", importMR);
@@ -166,11 +167,16 @@ public class CostEvaluator extends Evaluator {
                 schedule.getHorizon(), exportMR.getMainVersion());
 
         double cost = importCost - generationBenefits - exportBenefits;
-        reportedMetric.put("cost.elec.1d" , cost + "");
+        reportedMetric.put("cost.elec.1d", cost + "");
         sendEvalToContext("cost.elec.1d", schedule.getStart(), cost + "",
                 schedule.getHorizon(), exportMR.getMainVersion());
 
-        return new EvaluationReport(getId(), reportedMetric, resultSchedule);
+        EvaluationReport report = new EvaluationReport(getId(),
+                generationMR.getMainVersion(), reportedMetric, resultSchedule);
+        lastReport = report;
+        publishReport(report);
+
+        return report;
     }
 
     private MetricRecord evalMetric(final Schedule schedule,
@@ -181,9 +187,9 @@ public class CostEvaluator extends Evaluator {
         MetricRecord rateMR = schedule.getMetricRecordMap().get(rateMetric);
         MetricRecord tariffMR = schedule.getMetricRecordMap().get(tariffMetric);
         MetricRecord evalMR = new MetricRecord(outputMetric, rateMR.getTimeFrame());
-        if (rateMR.getRecords()==null || rateMR.getRecords().size()==0) {
+        if (rateMR.getRecords() == null || rateMR.getRecords().size() == 0) {
             logError("No record for metric " + rateMetric);
-        } else if (tariffMR.getRecords()==null || tariffMR.getRecords().size()==0) {
+        } else if (tariffMR.getRecords() == null || tariffMR.getRecords().size() == 0) {
             logError("No record for metric " + tariffMetric);
         } else {
             int indexRate = 1;
@@ -200,20 +206,26 @@ public class CostEvaluator extends Evaluator {
                     double prevTariff = tariff.getDouble();
                     indexTariff++;
                     tariff = tariffMR.getRecords().get(indexTariff);
-                    double energyKWh = Convert.watt2kWh(prevRate, tariff.getTS() - prevTS);
-                    evalMR.addRecord(prevTS, etp.calculate(energyKWh, prevTariff) + "", 1);
+                    long duration = tariff.getTS() - prevTS;
+                    double energyKWh = Convert.watt2kWh(prevRate, duration);
+                    evalMR.addRecord(prevTS, duration, etp.calculate(energyKWh, prevTariff) + "",
+                            rateMR.getMainVersion(), 1);
                     prevTS = tariff.getTS();
                 }
-                double energyKWh = Convert.watt2kWh(prevRate, rate.getTS() - prevTS);
-                evalMR.addRecord(prevTS, etp.calculate(energyKWh, tariff.getDouble()) + "", 1);
+                long duration = rate.getTS() - prevTS;
+                double energyKWh = Convert.watt2kWh(prevRate, duration);
+                evalMR.addRecord(prevTS, duration, etp.calculate(energyKWh, tariff.getDouble()) + "",
+                        rateMR.getMainVersion(), 1);
                 prevTS = rate.getTS();
                 prevRate = rate.getDouble();
                 indexRate++;
             }
 
             if (schedule.getHorizon() > prevTS) {
-                double energyKWh = Convert.watt2kWh(prevRate, schedule.getHorizon() - prevTS);
-                evalMR.addRecord(prevTS, etp.calculate(energyKWh, tariff.getDouble()) + "", 1);
+                long duration = schedule.getHorizon() - prevTS;
+                double energyKWh = Convert.watt2kWh(prevRate, duration);
+                evalMR.addRecord(prevTS, duration, etp.calculate(energyKWh, tariff.getDouble()) + "",
+                        rateMR.getMainVersion(), 1);
             }
         }
 
@@ -231,15 +243,15 @@ public class CostEvaluator extends Evaluator {
     @Input
     public void getNotif(String notifStr) {
         JsonObject jsonNotif = JsonObject.readFrom(notifStr);
-        if (jsonNotif.get("dest").asString().equals(getFullId())) {
+        if (jsonNotif.get("src").asString().contains("EnergyEvaluator")) {
             Notif notif = new Notif(jsonNotif);
-            if (notif.getContent() instanceof MetricRecord) {
-                MetricRecord mr = (MetricRecord)notif.getContent();
-
-                // if pv record has just been corrected, redo the evaluate
-                if (mr.getMetricId().equals("power.gen.SolarPV") && mr.getMainVersion().equals("corrected")) {
-                    if (lastReport!=null) {
-                        evaluate(lastReport.getSchedule().getStart(), lastReport.getSchedule().getHorizon(),
+            if (notif.getContent() instanceof EvaluationReport) {
+                EvaluationReport report = (EvaluationReport) notif.getContent();
+                // if new energy report based on corrected values, redo the evaluate
+                if (report.getVersion().equals("corrected")) {
+                    if (lastReport != null) {
+                        evaluate(lastReport.getSchedule().getStart(),
+                                lastReport.getSchedule().getStart() + lastReport.getSchedule().getHorizon(),
                                 new ShowIfErrorCallback());
                     }
                 }
