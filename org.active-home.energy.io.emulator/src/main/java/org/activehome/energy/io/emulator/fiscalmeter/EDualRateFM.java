@@ -25,6 +25,8 @@ package org.activehome.energy.io.emulator.fiscalmeter;
  */
 
 
+import org.activehome.com.Notif;
+import org.activehome.context.data.DataPoint;
 import org.activehome.tools.Convert;
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.Param;
@@ -56,35 +58,54 @@ public class EDualRateFM extends EFiscalMeter {
     @Param(defaultValue = "7h")
     private String switchTime;
 
+    /**
+     * the timestamp of the next switch of rate
+     */
+    private long nextUpdate;
+
 
     @Override
     public void onStartTime() {
         initExecutor();
-        updateTariff();
+        switchTariff();
     }
 
     @Override
     public void onResumeTime() {
         initExecutor();
-        updateTariff();
+        switchTariff();
     }
 
-    public void updateTariff() {
+    public void switchTariff() {
+        long actualSwitchTime = updateTariff();
+        DataPoint dp = new DataPoint(metricId, actualSwitchTime, currentRate + "");
+        sendNotif(new Notif(getFullId(), getNode() + ".context", getCurrentTime(), dp));
+        scheduleNextUpdate();
+    }
+
+    /**
+     * update the tariff
+     * @return the actual time of switch
+     */
+    public long updateTariff() {
         long midnight = getLocalTime() - (getLocalTime() % DAY);
         long changeTariffTime = Convert.strDurationToMillisec(switchTime);
-        long nextUpdate;
         boolean isDay = (getLocalTime() - midnight) >= changeTariffTime;
         if (isDay) {
             currentRate = highRate;
             nextUpdate = midnight + DAY;
+            return midnight + changeTariffTime - getTic().getTimezone()*HOUR;
         } else {
             currentRate = lowRate;
             nextUpdate = midnight + changeTariffTime;
+            return midnight - getTic().getTimezone()*HOUR;
         }
-        publishRate();
+    }
+
+    public void scheduleNextUpdate() {
         nextUpdate = nextUpdate - getTic().getTimezone() * HOUR;
         long delay = (nextUpdate-getCurrentTime())/getTic().getZip();
-        stpe.schedule(this::updateTariff, delay, TimeUnit.MILLISECONDS);
+        stpe.schedule(this::switchTariff, delay, TimeUnit.MILLISECONDS);
     }
 
 }

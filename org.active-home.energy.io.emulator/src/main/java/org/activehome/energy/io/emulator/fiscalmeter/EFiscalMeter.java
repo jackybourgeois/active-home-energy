@@ -68,7 +68,7 @@ public abstract class EFiscalMeter extends IO {
 
     @Override
     public void onStopTime() {
-        stpe.shutdown();
+        stpe.shutdownNow();
     }
 
 

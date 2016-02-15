@@ -25,6 +25,8 @@ package org.activehome.energy.io.emulator.fiscalmeter;
  */
 
 
+import org.activehome.com.Notif;
+import org.activehome.context.data.DataPoint;
 import org.activehome.tools.Convert;
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.Param;
@@ -60,6 +62,8 @@ public class EConstantFM extends EFiscalMeter {
     @Override
     public final void onStartTime() {
         currentRate = rate;
+        DataPoint dp = new DataPoint(metricId, getTic().getTS(), currentRate + "");
+        sendNotif(new Notif(getFullId(), getNode() + ".context", getCurrentTime(), dp));
         scheduleRate();
     }
 
@@ -71,7 +75,7 @@ public class EConstantFM extends EFiscalMeter {
     private void scheduleRate() {
         initExecutor();
         long delay = Convert.strDurationToMillisec(updateFrequency) / getTic().getZip();
-        stpe.scheduleAtFixedRate(this::publishRate, 0, delay, TimeUnit.MILLISECONDS);
+        stpe.scheduleAtFixedRate(this::publishRate, delay, delay, TimeUnit.MILLISECONDS);
     }
 
 }
