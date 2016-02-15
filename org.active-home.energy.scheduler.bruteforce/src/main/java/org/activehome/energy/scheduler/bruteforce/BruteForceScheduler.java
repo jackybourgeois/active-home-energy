@@ -44,15 +44,11 @@ import org.kevoree.annotation.Input;
 import org.kevoree.annotation.Param;
 import org.kevoree.api.handler.UUIDModel;
 import org.kevoree.log.Log;
-import org.kevoree.ContainerRoot;
 import org.kevoree.annotation.KevoreeInject;
 import org.kevoree.annotation.Param;
 import org.kevoree.annotation.Start;
 import org.kevoree.api.ModelService;
 import org.kevoree.api.handler.UUIDModel;
-import org.kevoree.factory.DefaultKevoreeFactory;
-import org.kevoree.factory.KevoreeFactory;
-import org.kevoree.pmodeling.api.ModelCloner;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -77,21 +73,9 @@ public class BruteForceScheduler extends Service implements RequestHandler {
             + "getNotif>Context.pushDataToSystem")
     private String bindingScheduler;
 
-    /**
-     * To get a local copy of Kevoree model.
-     */
-    private ModelCloner cloner;
-
     @Override
     protected RequestHandler getRequestHandler(Request request) {
         return this;
-    }
-
-    @Start
-    public void start() {
-        super.start();
-        KevoreeFactory kevFactory = new DefaultKevoreeFactory();
-        cloner = kevFactory.createModelCloner();
     }
 
     @Override
@@ -112,7 +96,8 @@ public class BruteForceScheduler extends Service implements RequestHandler {
     public final void schedule(final Schedule schedule,
                                final RequestCallback callback) {
         new Thread(() -> {
-            HashMap<String, Device> negotiables = negotiableDeviceMap();
+            HashMap<String, Device> negotiables = ModelHelper
+                    .negotiableDeviceMap(getModelService(), this.getNode());
             LinkedList<MetricRecord> loads =
                     extractNegotiableLoads(schedule, negotiables);
             if (loads.size() == 0) {
@@ -394,24 +379,6 @@ public class BruteForceScheduler extends Service implements RequestHandler {
         return episode;
     }
 
-    /**
-     * Look at the Kevoree model to find InteractiveAppliance
-     * which are negotiables and update the negotiableDeviceMap.
-     */
-    private HashMap<String, Device> negotiableDeviceMap() {
-        UUIDModel model = getModelService().getCurrentModel();
-        ContainerRoot localModel = cloner.clone(model.getModel());
-        HashMap<String, Device> deviceMap = ModelHelper.findAllRunningDevice("InteractiveAppliance",
-                new String[]{context.getNodeName()}, localModel);
-        HashMap<String, Device> negotiableDeviceMap = new HashMap<>();
-        deviceMap.keySet().stream()
-                .filter(deviceId -> deviceMap.get(deviceId).isNegotiable())
-                .forEach(deviceId -> {
-                    negotiableDeviceMap.put(deviceId, deviceMap.get(deviceId));
-                });
-        return negotiableDeviceMap;
-    }
-
     public int[] toSolution(LinkedList<MetricRecord> loads,
                             Schedule schedule) {
         int nbLoad = 0;
@@ -430,10 +397,8 @@ public class BruteForceScheduler extends Service implements RequestHandler {
      * @return map of device
      */
     public HashMap<String, Device> findRunningDevice(final String type) {
-        UUIDModel model = getModelService().getCurrentModel();
-        ContainerRoot localModel = cloner.clone(model.getModel());
         return ModelHelper.findAllRunningDevice(type,
-                new String[]{context.getNodeName()}, localModel);
+                new String[]{context.getNodeName()}, getModelService());
     }
 
     private void controlTime(final String cmd) {
