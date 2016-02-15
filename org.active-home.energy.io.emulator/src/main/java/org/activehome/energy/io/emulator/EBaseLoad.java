@@ -222,11 +222,13 @@ public class EBaseLoad extends BackgroundAppliance {
             consumption = 0;
         }
 
-        currentPower = consumption;
-        DataPoint dp = new DataPoint(metrics.replace("<compId>", getId()),
-                ts, currentPower + "");
-        sendNotif(new Notif(getFullId(), getNode() + ".context",
-                getCurrentTime(), dp));
+        if (currentPower!=consumption) {
+            currentPower = consumption;
+            DataPoint dp = new DataPoint(metrics.replace("<compId>", getId()),
+                    ts, currentPower + "");
+            sendNotif(new Notif(getFullId(), getNode() + ".context",
+                    getCurrentTime(), dp));
+        }
     }
 
     /**
