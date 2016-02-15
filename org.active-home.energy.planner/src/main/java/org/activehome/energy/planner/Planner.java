@@ -28,9 +28,7 @@ package org.activehome.energy.planner;
 import com.eclipsesource.json.JsonObject;
 import org.activehome.com.Notif;
 import org.activehome.com.Request;
-import org.activehome.com.RequestCallback;
 import org.activehome.com.ShowIfErrorCallback;
-import org.activehome.com.error.Error;
 import org.activehome.context.data.Episode;
 import org.activehome.context.data.Event;
 import org.activehome.context.data.Schedule;
@@ -38,23 +36,12 @@ import org.activehome.context.data.Device;
 import org.activehome.context.data.MetricRecord;
 import org.activehome.context.data.Record;
 import org.activehome.context.data.SampledRecord;
-import org.activehome.context.helper.ModelHelper;
-import org.activehome.energy.library.EnergyHelper;
 import org.activehome.service.RequestHandler;
 import org.activehome.service.Service;
 import org.activehome.user.UserSuggestion;
 import org.activehome.user.UserSuggestionResponse;
 import org.kevoree.annotation.*;
-import org.kevoree.ContainerRoot;
-import org.kevoree.api.ModelService;
-import org.kevoree.api.handler.UUIDModel;
-import org.kevoree.factory.DefaultKevoreeFactory;
-import org.kevoree.factory.KevoreeFactory;
 import org.kevoree.log.Log;
-import org.kevoree.pmodeling.api.ModelCloner;
-
-import java.util.HashMap;
-import java.util.LinkedList;
 
 /**
  * @author Jacky Bourgeois
@@ -73,12 +60,6 @@ public class Planner extends Service implements RequestHandler {
             + "pushUserSuggestion>User.getNotif,"
             + "getNotif>User.pushNotif")
     private String bindingPlanner;
-
-
-    /**
-     * To get a local copy of Kevoree model.
-     */
-    private ModelCloner cloner;
 
     private UserSuggestion lastUserSuggestion;
     private Schedule currentPlan;
@@ -99,8 +80,6 @@ public class Planner extends Service implements RequestHandler {
         super.start();
         lastUserSuggestion = null;
         currentPlan = null;
-        KevoreeFactory kevFactory = new DefaultKevoreeFactory();
-        cloner = kevFactory.createModelCloner();
     }
 
     @Override
@@ -201,21 +180,4 @@ public class Planner extends Service implements RequestHandler {
         }
     }
 
-    /**
-     * Look at the Kevoree model to find InteractiveAppliance
-     * which are negotiables and update the negotiableDeviceMap.
-     */
-    private HashMap<String, Device> negotiableDeviceMap() {
-        UUIDModel model = getModelService().getCurrentModel();
-        ContainerRoot localModel = cloner.clone(model.getModel());
-        HashMap<String, Device> deviceMap = ModelHelper.findAllRunningDevice("InteractiveAppliance",
-                new String[]{context.getNodeName()}, localModel);
-        HashMap<String, Device> negotiableDeviceMap = new HashMap<>();
-        deviceMap.keySet().stream()
-                .filter(deviceId -> deviceMap.get(deviceId).isNegotiable())
-                .forEach(deviceId -> {
-                    negotiableDeviceMap.put(deviceId, deviceMap.get(deviceId));
-                });
-        return negotiableDeviceMap;
-    }
 }
