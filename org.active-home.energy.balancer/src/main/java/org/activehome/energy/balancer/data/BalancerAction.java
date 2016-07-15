@@ -34,13 +34,6 @@ public class BalancerAction extends Action {
 
     private final ApplianceContext applianceContext;
 
-    /**
-     * @param theApplianceContext
-     * @param theStartCmd
-     * @param theEndCmd
-     * @param theImpact
-     * @param theDuration
-     */
     public BalancerAction(final ApplianceContext theApplianceContext,
                           final Command theStartCmd,
                           final Command theEndCmd,

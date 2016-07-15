@@ -14,6 +14,7 @@
     <artifactId>org.active-home.energy.balancer</artifactId>
     <packaging>jar</packaging>
     <name>Active Home :: Energy :: Power Balancer</name>
+    <version>0.0.4-SNAPSHOT</version>
     <description>Watch the home electricity balance in real time for improvement</description>
     <url>http://active-home.org</url>
 
