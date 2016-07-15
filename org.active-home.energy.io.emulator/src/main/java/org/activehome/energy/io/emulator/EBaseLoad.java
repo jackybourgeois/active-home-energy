@@ -36,27 +36,19 @@ import org.activehome.mysql.HelperMySQL;
 import org.activehome.time.TimeControlled;
 import org.activehome.time.TimeStatus;
 import org.activehome.tools.SunsetSunrise;
-import org.kevoree.ContainerRoot;
-import org.kevoree.factory.DefaultKevoreeFactory;
-import org.kevoree.factory.KevoreeFactory;
-import org.kevoree.pmodeling.api.ModelCloner;
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.KevoreeInject;
 import org.kevoree.annotation.Param;
 import org.kevoree.annotation.Start;
 import org.kevoree.api.ModelService;
-import org.kevoree.api.handler.UUIDModel;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.TimeZone;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -82,11 +74,6 @@ public class EBaseLoad extends BackgroundAppliance {
      */
     @Param(defaultValue = "power.cons.bg.<compId>")
     private String metrics;
-    /**
-     * Access to the Kevoree model
-     */
-    @KevoreeInject
-    private ModelService modelService;
 
     /**
      * Source of the data.
@@ -114,10 +101,6 @@ public class EBaseLoad extends BackgroundAppliance {
     @Param(defaultValue = "generation")
     private String dbMetricGeneration;
     /**
-     * MySQL date parser.
-     */
-    private static SimpleDateFormat dfMySQL;
-    /**
      * Last value sent, the current power.
      */
     private double currentPower;
@@ -132,24 +115,11 @@ public class EBaseLoad extends BackgroundAppliance {
      */
     private ScheduledThreadPoolExecutor stpe;
 
-    private ModelCloner cloner;
-
     private LinkedList<DataPoint> data;
 
     private LinkedList<String> devices;
 
     private HashMap<String, Double> currentPowerMap;
-
-    // == == == Component life cycle == == ==
-
-    @Start
-    public void start() {
-        super.start();
-        KevoreeFactory kevFactory = new DefaultKevoreeFactory();
-        cloner = kevFactory.createModelCloner();
-        dfMySQL = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dfMySQL.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
 
     // == == == Time life cycle == == ==
 
@@ -247,8 +217,8 @@ public class EBaseLoad extends BackgroundAppliance {
         ResultSet result = null;
         try {
             prepStmt = dbConnect.prepareStatement(generateQuery());
-            prepStmt.setString(1, dfMySQL.format(new Date(startTS)));
-            prepStmt.setString(2, dfMySQL.format(new Date(endTS)));
+            prepStmt.setLong(1, startTS);
+            prepStmt.setLong(2, endTS);
             prepStmt.setString(3, dbMetricImport);
             prepStmt.setString(4, dbMetricExport);
             prepStmt.setString(5, dbMetricGeneration);
@@ -260,7 +230,7 @@ public class EBaseLoad extends BackgroundAppliance {
             result = prepStmt.executeQuery();
             while (result.next()) {
                 String value = result.getString("value");
-                long ts = dfMySQL.parse(result.getString("timestamp")).getTime();
+                long ts = result.getLong("timestamp");
                 String metricId = result.getString("metricID");
                 if (metricId.contains("SolarPV") || metricId.contains("export")) {
                     SunsetSunrise ss = new SunsetSunrise(52.041404, -0.72878, new Date(startTS), 0);
@@ -272,8 +242,6 @@ public class EBaseLoad extends BackgroundAppliance {
             }
         } catch (SQLException exception) {
             logError("SQL error while extracting data: " + exception.getMessage());
-        } catch (ParseException e) {
-            e.printStackTrace();
         } finally {
             DataHelper.closeStatement(prepStmt, this);
             DataHelper.closeResultSet(result, this);
@@ -335,9 +303,9 @@ public class EBaseLoad extends BackgroundAppliance {
 
     private String generateQuery() {
         StringBuilder query = new StringBuilder();
-        query.append("SELECT `metricID`, `timestamp`, `value` ")
+        query.append("SELECT `metricID`, UNIX_TIMESTAMP(`timestamp`)*1000 AS 'timestamp', `value` ")
                 .append(" FROM `").append(tableName).append("`")
-                .append(" WHERE (`timestamp` BETWEEN ? AND ?) ")
+                .append(" WHERE (UNIX_TIMESTAMP(`timestamp`)*1000 BETWEEN ? AND ?) ")
                 .append(" AND (metricID=? OR metricID=? OR metricID=? ");
 
         for (String device : devices) {
@@ -351,10 +319,8 @@ public class EBaseLoad extends BackgroundAppliance {
      *
      */
     private void updateSource() {
-        UUIDModel model = modelService.getCurrentModel();
-        ContainerRoot localModel = cloner.clone(model.getModel());
         LinkedList<String> apps = ModelHelper.findAllRunning("Appliance",
-                new String[]{context.getNodeName()}, localModel);
+                new String[]{context.getNodeName()}, getModelService());
 
         devices = new LinkedList<>();
         for (String appFullName : apps) {

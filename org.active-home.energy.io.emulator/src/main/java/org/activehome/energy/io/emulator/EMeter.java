@@ -85,10 +85,6 @@ public class EMeter extends Meter {
     @Param
     private String dbMetricId;
     /**
-     * SQL date format.
-     */
-    private SimpleDateFormat dfMySQL;
-    /**
      * if time is paused, time when the time has been paused
      */
     private long pauseTime;
@@ -105,8 +101,6 @@ public class EMeter extends Meter {
     @Override
     public final void start() {
         super.start();
-        dfMySQL = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dfMySQL.setTimeZone(TimeZone.getTimeZone("UTC"));
         currentPower = 0;
     }
 
@@ -172,9 +166,9 @@ public class EMeter extends Meter {
      */
     public final void loadData(final long startTS,
                                final long endTS) {
-        String query = "SELECT `metricID`, `timestamp`, `value`"
+        String query = "SELECT `metricID`, UNIX_TIMESTAMP(d.`timestamp`)*1000 AS 'timestamp', `value`"
                 + " FROM `" + tableName + "` d"
-                + " WHERE `timestamp` BETWEEN ? AND ? AND `metricID`=?"
+                + " WHERE UNIX_TIMESTAMP(d.`timestamp`)*1000 BETWEEN ? AND ? AND `metricID`=?"
                 + " ORDER BY `timestamp`";
         Connection dbConnect = HelperMySQL.connect(urlSQLSource);
 
@@ -185,20 +179,18 @@ public class EMeter extends Meter {
 
         try {
             prepStmt = dbConnect.prepareStatement(query);
-            prepStmt.setString(1, dfMySQL.format(startTS));
-            prepStmt.setString(2, dfMySQL.format(endTS));
+            prepStmt.setLong(1, startTS);
+            prepStmt.setLong(2, endTS);
             prepStmt.setString(3, dbMetricId);
             result = prepStmt.executeQuery();
             String metricId = metrics.replace("<compId>", getId());
             while (result.next()) {
                 String value = result.getString("value");
-                long ts = dfMySQL.parse(result.getString("timestamp")).getTime();
+                long ts = result.getLong("timestamp");
                 dataPoints.addLast(new DataPoint(metricId, ts, value));
             }
         } catch (SQLException exception) {
             logError("SQL error while extracting data: " + exception.getMessage());
-        } catch (ParseException e) {
-            e.printStackTrace();
         } finally {
             DataHelper.closeStatement(prepStmt, this);
             DataHelper.closeResultSet(result, this);

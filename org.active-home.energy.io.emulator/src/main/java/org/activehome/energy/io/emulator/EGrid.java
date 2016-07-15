@@ -34,21 +34,18 @@ import org.activehome.mysql.HelperMySQL;
 import org.activehome.time.TimeControlled;
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.Param;
-import org.kevoree.annotation.Start;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
- *
  * @author Jacky Bourgeois
  * @version %I%, %G%
  */
@@ -87,10 +84,6 @@ public class EGrid extends IO {
     @Param(optional = false)
     private String tableName;
     /**
-     * SQL date format.
-     */
-    private SimpleDateFormat dfMySQL;
-    /**
      * if time is paused, time when the time has been paused
      */
     private long pauseTime;
@@ -100,13 +93,6 @@ public class EGrid extends IO {
     private ScheduledThreadPoolExecutor stpe;
     private HashMap<String, Integer> co2Map;
     private LinkedList<DataPoint> data;
-
-    @Start
-    public final void start() {
-        super.start();
-        dfMySQL = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dfMySQL.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
 
     @Override
     public final void onStartTime() {
@@ -157,8 +143,9 @@ public class EGrid extends IO {
 
     public void loadData(final long startTS,
                          final long endTS) {
-        String query = "SELECT * FROM " + tableName
-                + " WHERE `ts` BETWEEN ? AND ? ORDER BY `ts`";
+        String query = "SELECT `value`, `metricID`, UNIX_TIMESTAMP(`ts`)*1000 AS 'ts'"
+                + " FROM " + tableName
+                + " WHERE UNIX_TIMESTAMP(`ts`)*1000 BETWEEN ? AND ? ORDER BY `ts`";
 
         Connection dbConnect = HelperMySQL.connect(urlSQLSource);
 
@@ -168,18 +155,17 @@ public class EGrid extends IO {
 
         try {
             prepStmt = dbConnect.prepareStatement(query);
-            prepStmt.setString(1, dfMySQL.format(new Date(startTS)));
-            prepStmt.setString(2, dfMySQL.format(new Date(endTS)));
+            prepStmt.setLong(1, startTS);
+            prepStmt.setLong(2, endTS);
             result = prepStmt.executeQuery();
 
             long currentTS = 0;
             double carbonIntensity = 0;
 
-            DecimalFormat df = new DecimalFormat("#.###");
             while (result.next()) {
                 double val = result.getDouble("value") / 100.;
                 String metricId = result.getString("metricID");
-                long ts = dfMySQL.parse(result.getString("ts")).getTime();
+                long ts = result.getLong("ts");
                 if (currentTS != 0 && currentTS != ts) {
                     newData.addLast(new DataPoint("grid.carbonIntensity", currentTS, carbonIntensity + ""));
                     currentTS = ts;
@@ -199,8 +185,6 @@ public class EGrid extends IO {
             logError(e.getMessage());
             e.printStackTrace();
         } catch (ParseException e) {
-            e.printStackTrace();
-        } catch (java.text.ParseException e) {
             e.printStackTrace();
         } finally {
             DataHelper.closeStatement(prepStmt, this);
