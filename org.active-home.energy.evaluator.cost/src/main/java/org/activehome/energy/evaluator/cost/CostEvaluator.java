@@ -137,11 +137,6 @@ public class CostEvaluator extends Evaluator {
         HashMap<String, String> reportedMetric = new HashMap<>();
         Schedule resultSchedule = new Schedule(schedule);
 
-        logError("## gen main versions: " + schedule.getMetricRecordMap().get("power.gen").getMainVersion());
-        for (String vers : schedule.getMetricRecordMap().get("power.gen").getAllVersionRecords().keySet()) {
-            logError("## gen versions: " + vers);
-        }
-
         MetricRecord importMR = evalMetric(schedule, impETP, "power.import",
                 "tariff.elec.import", "cost.elec.import");
         resultSchedule.getMetricRecordMap().put("cost.elec.import", importMR);

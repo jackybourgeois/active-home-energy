@@ -55,9 +55,6 @@ public class TesterEnvironmentalImpactEvaluator extends ComponentTester {
     private ScheduledThreadPoolExecutor stpe;
     private boolean testDone = false;
 
-    /**
-     * On init, subscribe to relevant metrics.
-     */
     @Override
     public final void onInit() {
         super.onInit();
