@@ -45,10 +45,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.LinkedList;
-import java.util.TimeZone;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -59,11 +57,18 @@ import java.util.concurrent.TimeUnit;
 @ComponentType
 public class EBackgroundApp extends BackgroundAppliance {
 
+    /**
+     * Last value sent, the current power.
+     */
+    protected double currentPower;
+    /**
+     * Scheduler playing the load values at the right time.
+     */
+    protected ScheduledThreadPoolExecutor stpe;
     @Param(defaultValue = "Background device emulator based on actual data.")
     private String description;
     @Param(defaultValue = "/active-home-energy/tree/master/org.active-home.energy.io.emulator")
     private String src;
-
     /**
      * Commands.
      */
@@ -104,18 +109,6 @@ public class EBackgroundApp extends BackgroundAppliance {
      */
     private LinkedList<DataPoint> data;
     /**
-     * SQL date format.
-     */
-    protected SimpleDateFormat dfMySQL;
-    /**
-     * Last value sent, the current power.
-     */
-    protected double currentPower;
-    /**
-     * Scheduler playing the load values at the right time.
-     */
-    protected ScheduledThreadPoolExecutor stpe;
-    /**
      * if stopped, time when the appliance has been stopped.
      */
     private long appStopTime;
@@ -137,6 +130,9 @@ public class EBackgroundApp extends BackgroundAppliance {
      * What was the power at stop time, used to calculate missed energy.
      */
     private double powerAtStoppedTime;
+
+    private Future nextLoadingFuture;
+    private Future nextValFuture;
 
     /**
      * @param reqStr Command received as string
@@ -161,14 +157,6 @@ public class EBackgroundApp extends BackgroundAppliance {
         }
     }
 
-    // == == == Component life cycle == == ==
-
-    public final void start() {
-        super.start();
-        dfMySQL = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dfMySQL.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
     // == == == Time life cycle == == ==
 
     @Override
@@ -186,8 +174,8 @@ public class EBackgroundApp extends BackgroundAppliance {
     public final void onPauseTime() {
         super.onPauseTime();
         pauseTime = getCurrentTime();
-        stpe.shutdownNow();
-        initExecutor();
+        nextLoadingFuture.cancel(true);
+        nextValFuture.cancel(true);
     }
 
     @Override
@@ -196,12 +184,12 @@ public class EBackgroundApp extends BackgroundAppliance {
         if (pauseTime != -1) {
             if (appStopTime != -1) {    // the appliance was stopped when time has been paused
                 long execTime = (appStopTime + maxOffTime - pauseTime) / getTic().getZip();
-                stpe.schedule(this::startLoad, execTime, TimeUnit.MILLISECONDS);
+                nextValFuture = stpe.schedule(this::startLoad, execTime, TimeUnit.MILLISECONDS);
             } else {
                 if (!data.isEmpty()) {  // the appliance was running when time has been paused
                     DataPoint dp = data.getFirst();
                     long execTime = (dp.getTS() - pauseTime) / getTic().getZip();
-                    stpe.schedule(this::playNextValue, execTime, TimeUnit.MILLISECONDS);
+                    nextValFuture = stpe.schedule(this::playNextValue, execTime, TimeUnit.MILLISECONDS);
                 }
             }
             scheduleNextLoadingTime();
@@ -222,6 +210,7 @@ public class EBackgroundApp extends BackgroundAppliance {
      */
     public final void startLoad() {
         if (!status.equals(Status.ON)) {
+            nextValFuture.cancel(true);
             logInfo("Start");
             long startTime = getCurrentTime();
             if (appStopTime != -1) {
@@ -234,6 +223,31 @@ public class EBackgroundApp extends BackgroundAppliance {
             appStopTime = -1;
         } else {
             logInfo("Already ON");
+        }
+    }
+
+
+    /**
+     *
+     */
+    public final void stopLoad() {
+        if (status.equals(Status.ON)) {
+            logInfo("Stopped");
+            if (nextValFuture != null) {
+                nextValFuture.cancel(true);
+            }
+            appStopTime = getCurrentTime();
+            powerAtStoppedTime = currentPower;
+            updateCurrentPower(appStopTime, 0);
+
+            // schedule auto start after 'maxOffTime'
+            // in case no one else restart it
+            long delay = maxOffTime / getTic().getZip();
+            nextValFuture = stpe.schedule(this::startLoad, delay, TimeUnit.MILLISECONDS);
+        } else if (status.equals(Status.LOCKED_ON)) {
+            logInfo("Cannot be stopped (Locked ON till " + strLocalTime(lockTime) + ")");
+        } else if (status.equals(Status.OFF)) {
+            logInfo("Already OFF");
         }
     }
 
@@ -321,29 +335,6 @@ public class EBackgroundApp extends BackgroundAppliance {
     }
 
     /**
-     *
-     */
-    public final void stopLoad() {
-        if (status.equals(Status.ON)) {
-            logInfo("Stopped");
-            stpe.shutdownNow();
-            appStopTime = getCurrentTime();
-            powerAtStoppedTime = currentPower;
-            updateCurrentPower(appStopTime, 0);
-
-            // schedule auto start after 'maxOffTime'
-            // in case no one else restart it
-            long delay = maxOffTime / getTic().getZip();
-            logInfo("restart in " + delay);
-            stpe.schedule(this::startLoad, delay, TimeUnit.MILLISECONDS);
-        } else if (status.equals(Status.LOCKED_ON)) {
-            logInfo("Cannot be stopped (Locked ON till " + strLocalTime(lockTime) + ")");
-        } else if (status.equals(Status.OFF)) {
-            logInfo("Already OFF");
-        }
-    }
-
-    /**
      * Send the next value of the running load.
      */
     private void playNextValue() {
@@ -367,7 +358,7 @@ public class EBackgroundApp extends BackgroundAppliance {
         if (!data.isEmpty()) {
             DataPoint dp = data.getFirst();
             long execTime = (dp.getTS() - getCurrentTime()) / getTic().getZip();
-            stpe.schedule(this::playNextValue, execTime, TimeUnit.MILLISECONDS);
+            nextValFuture = stpe.schedule(this::playNextValue, execTime, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -379,10 +370,10 @@ public class EBackgroundApp extends BackgroundAppliance {
      * @return the list of DataPoint to play
      */
     private void loadData(final long startTS,
-                                           final long endTS) {
-        String query = "SELECT `metricID`, `timestamp`, `value`"
+                          final long endTS) {
+        String query = "SELECT `metricID`, UNIX_TIMESTAMP(d.`timestamp`)*1000 AS 'timestamp', `value`"
                 + " FROM `" + tableName + "` d"
-                + " WHERE `timestamp` BETWEEN ? AND ? AND `metricID`=?"
+                + " WHERE UNIX_TIMESTAMP(d.`timestamp`)*1000 BETWEEN ? AND ? AND `metricID`=?"
                 + " ORDER BY `timestamp`";
         Connection dbConnect = HelperMySQL.connect(urlSQLSource);
 
@@ -391,15 +382,15 @@ public class EBackgroundApp extends BackgroundAppliance {
         ResultSet result = null;
         try {
             prepStmt = dbConnect.prepareStatement(query);
-            prepStmt.setString(1, dfMySQL.format(startTS));
-            prepStmt.setString(2, dfMySQL.format(endTS));
+            prepStmt.setLong(1, startTS);
+            prepStmt.setLong(2, endTS);
             prepStmt.setString(3, dbMetricId);
             result = prepStmt.executeQuery();
 
             Double prevVal = null;
             while (result.next()) {
                 Double value = Double.valueOf(result.getString("value"));
-                long ts = dfMySQL.parse(result.getString("timestamp")).getTime();
+                long ts = result.getLong("timestamp");
                 if (prevVal == null || !prevVal.equals(value)) {
                     dataPoints.addLast(new DataPoint("power.cons.bg." + getId(),
                             ts, value + ""));
@@ -408,15 +399,13 @@ public class EBackgroundApp extends BackgroundAppliance {
             }
         } catch (SQLException exception) {
             logError("SQL error while extracting data: " + exception.getMessage());
-        } catch (ParseException e) {
-            e.printStackTrace();
         } finally {
             DataHelper.closeStatement(prepStmt, this);
             DataHelper.closeResultSet(result, this);
             HelperMySQL.closeDbConnection(dbConnect);
         }
 
-        if (data!=null) {
+        if (data != null) {
             data.addAll(dataPoints);
         } else {
             data = dataPoints;
@@ -519,7 +508,7 @@ public class EBackgroundApp extends BackgroundAppliance {
         publishStatus();
     }
 
-    private  void initExecutor() {
+    private void initExecutor() {
         stpe = new ScheduledThreadPoolExecutor(1, r -> {
             return new Thread(r, getFullId() + "-emulator-bg-pool");
         });
@@ -536,7 +525,8 @@ public class EBackgroundApp extends BackgroundAppliance {
             execTime = (endDataLoad - 4 * HOUR - getCurrentTime()) / getTic().getZip();
             startTS = endDataLoad;
         }
-        stpe.schedule(() -> loadData(startTS, startTS + TimeControlled.DAY),
+
+        nextLoadingFuture = stpe.schedule(() -> loadData(startTS, startTS + TimeControlled.DAY),
                 execTime, TimeUnit.MILLISECONDS);
     }
 
