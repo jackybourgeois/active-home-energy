@@ -61,6 +61,8 @@
         <module>org.active-home.energy.sim.battery</module>
         <module>org.active-home.energy.scheduler.bruteforce</module>
         <module>org.active-home.energy.widget</module>
+        <module>org.active-home.energy.emulator.solax</module>
+        <module>org.active-home.energy.solar</module>
     </modules>
 
     <dependencies>
