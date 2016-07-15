@@ -50,7 +50,6 @@ public class SolaxInverterEmulator extends IO {
     private String mongoDBName;
     @Param(defaultValue = "solar2")
     private String mongoDBCollection;
-    @Param(defaultValue = "userId")
     private String userId;
 
     private MongoCollection<Document> collection;
