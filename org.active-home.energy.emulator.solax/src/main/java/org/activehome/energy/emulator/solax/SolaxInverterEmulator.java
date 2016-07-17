@@ -1,5 +1,30 @@
 package org.activehome.energy.emulator.solax;
 
+/*
+ * #%L
+ * Active Home :: Energy :: Emulator :: Solax
+ * $Id:$
+ * $HeadURL:$
+ * %%
+ * Copyright (C) 2016 Active Home Project
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public 
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.html>.
+ * #L%
+ */
+
+
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -11,8 +36,10 @@ import org.activehome.io.IO;
 import org.activehome.time.TimeControlled;
 import org.activehome.time.TimeStatus;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.Param;
+import org.kevoree.annotation.Stop;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -50,10 +77,12 @@ public class SolaxInverterEmulator extends IO {
     private String mongoDBName;
     @Param(defaultValue = "solar2")
     private String mongoDBCollection;
+    @Param(optional = false)
     private String userId;
 
     private MongoCollection<Document> collection;
-
+    private MongoClient client;
+    MongoDatabase database;
 
     /**
      * if time is paused, time when the time has been paused
@@ -67,9 +96,17 @@ public class SolaxInverterEmulator extends IO {
     @Override
     public final void start() {
         super.start();
-        MongoClient client = new MongoClient();
-        MongoDatabase database = client.getDatabase(mongoDBName);
+        client = new MongoClient();
+        database = client.getDatabase(mongoDBName);
         collection = database.getCollection(mongoDBCollection);
+    }
+
+    @Stop
+    public final void stop() {
+        if (client != null) {
+            client.close();
+            database = null;
+        }
     }
 
     @Override
@@ -140,6 +177,7 @@ public class SolaxInverterEmulator extends IO {
         Notif notif = new Notif(getFullId(), getNode() + ".context",
                 getCurrentTime(), dpArray);
         sendNotif(notif);
+
     }
 
     private void initExecutor() {
@@ -160,33 +198,36 @@ public class SolaxInverterEmulator extends IO {
     }
 
     public void loadData(final long start,
-                                   final long end) {
+                         final long end) {
+        System.out.println(new Date(start) + " to " + new Date(end));
         String dateFieldName = "queryTime";
         String docName = "battery";
-        List<Document> docs = collection.find(
-                Filters.and(
-                        Filters.gte(docName + "." + dateFieldName, start),
-                        Filters.lte(docName + "." + dateFieldName, end),
-                        Filters.eq(docName + ".id", userId)))
+        Bson filter = Filters.and(
+                Filters.gte(docName + "." + dateFieldName, new Date(start)),
+                Filters.lte(docName + "." + dateFieldName, new Date(end)),
+                Filters.eq(docName + ".id", userId));
+        List<Document> docs = collection.find(filter)
                 .sort(Sorts.ascending(docName + "." + dateFieldName))
                 .into(new ArrayList<>());
 
-        if (data==null) {
+        if (data == null) {
             data = new LinkedList<>();
         }
+
 
         for (Document doc : docs) {
             Document batDoc = doc.get(docName, Document.class);
             long ts = batDoc.getDate(dateFieldName).getTime();
             DataPoint[] dpArray = new DataPoint[6];
-            dpArray[0] = new DataPoint(getId() + ".gridPower", ts, batDoc.getInteger("gridPower")+"");
-            dpArray[1] = new DataPoint(getId() + ".feedInPower", ts, batDoc.getInteger("feedInPower")+"");
-            dpArray[2] = new DataPoint(getId() + ".powerDC1", ts, batDoc.getInteger("powerDC1")+"");
-            dpArray[3] = new DataPoint(getId() + ".powerDC2", ts, batDoc.getInteger("powerDC2")+"");
-            dpArray[4] = new DataPoint(getId() + ".batteryPower", ts, batDoc.getInteger("batteryPower")+"");
-            dpArray[5] = new DataPoint(getId() + ".surplusPower", ts, batDoc.getInteger("surplusEnergy")+"");
+            dpArray[0] = new DataPoint(getId() + ".gridPower", ts, batDoc.getInteger("gridPower") + "");
+            dpArray[1] = new DataPoint(getId() + ".feedInPower", ts, batDoc.getInteger("feedInPower") + "");
+            dpArray[2] = new DataPoint(getId() + ".powerDC1", ts, batDoc.getInteger("powerDC1") + "");
+            dpArray[3] = new DataPoint(getId() + ".powerDC2", ts, batDoc.getInteger("powerDC2") + "");
+            dpArray[4] = new DataPoint(getId() + ".batteryPower", ts, batDoc.getInteger("batteryPower") + "");
+            dpArray[5] = new DataPoint(getId() + ".surplusPower", ts, batDoc.getInteger("surplusEnergy") + "");
             data.addLast(dpArray);
         }
+
     }
 
 }
