@@ -7,14 +7,37 @@
         <groupId>org.active-home.energy</groupId>
         <version>0.0.3-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>org.active-home.energy.solax</artifactId>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>org.active-home.energy.emulator.solax</artifactId>
+    <version>0.0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>Active Home :: Energy :: Solax</name>
-    <description>Extract data from a Solax system</description>
+    <name>Active Home :: Energy :: Emulator :: Solax</name>
+    <description>Load data from Solax historical data</description>
     <url>http://active-home.org</url>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.active-home</groupId>
+            <artifactId>org.active-home.io</artifactId>
+            <version>0.0.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.active-home</groupId>
+            <artifactId>org.active-home.context</artifactId>
+            <version>0.0.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.active-home</groupId>
+            <artifactId>org.active-home.test</artifactId>
+            <version>0.0.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver</artifactId>
+            <version>3.2.2</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
