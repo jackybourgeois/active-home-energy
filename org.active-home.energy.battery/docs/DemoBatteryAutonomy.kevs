@@ -1,0 +1,2 @@
+add ah.battery : org.activehome.energy.battery.BatteryAutonomy/0.0.3-SNAPSHOT
+add ah.solax : org.activehome.energy.solax.SolaxInverterEmulator/0.0.3-SNAPSHOT
