@@ -1,4 +1,4 @@
-package org.activehome.energy.emulator.solax.test;
+package org.activehome.energy.solax.test;
 
 /*
  * #%L
@@ -70,10 +70,9 @@ public class TesterSolaxInverterEmulator extends ComponentTester {
         startTS = getTic().getTS();
         stpe = new ScheduledThreadPoolExecutor(1);
 
-        String[] metricArray = new String[]{"gridPower","feedInPower","surplusEnergy","powerDC1","powerDC2"};
-        for (int i=0;i<metricArray.length;i++) {
-            metricArray[i] = testedCompId + "." + metricArray[i];
-        }
+        String[] metricArray = new String[]{"power.cons","storage.availabilityKWh",
+                "storage.availabilityPercent", "power.storage",
+                "power.gen."+testedCompId+"1","power.gen."+testedCompId+"2"};
         Request subscriptionReq = new Request(getFullId(), getNode() + ".context",
                 getCurrentTime(), "subscribe", new Object[]{metricArray, getFullId()});
 

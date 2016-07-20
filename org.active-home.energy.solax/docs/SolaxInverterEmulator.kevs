@@ -38,7 +38,7 @@ bind ah.taskScheduler.toSchedule chan_toSchedule_taskScheduler
 bind ah.taskScheduler.toExecute chan_toExecute_taskScheduler
 bind ah.timekeeper.getRequest chan_toExecute_taskScheduler
 
-add ah.tester : org.activehome.energy.emulator.solax.test.TesterSolaxInverterEmulator/0.0.3-SNAPSHOT
+add ah.tester : org.activehome.energy.solax.test.TesterSolaxInverterEmulator/0.0.3-SNAPSHOT
 set ah.tester.startDate = "2016-05-04 15:00:00"
 set ah.tester.testDuration = "1d"
 set ah.tester.testedCompId = "solax"
@@ -56,7 +56,7 @@ bind ah.tester.getResponse chan_getResponse_tester
 bind ah.context.pushResponse chan_getResponse_tester
 bind ah.tester.pushNotif chan_getNotif_context
 
-add ah.solax : org.activehome.energy.emulator.solax.SolaxInverterEmulator/0.0.3-SNAPSHOT
+add ah.solax : org.activehome.energy.solax.emulator.SolaxInverterEmulator/0.0.3-SNAPSHOT
 set ah.solax.userId = "223c3bcf0bd16c30b5024838ab9257b5"
 bind ah.solax.time chan_tic_timekeeper
 bind ah.solax.toSchedule chan_toSchedule_taskScheduler

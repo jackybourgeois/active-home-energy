@@ -1,4 +1,4 @@
-package org.activehome.energy.emulator.solax;
+package org.activehome.energy.solax.emulator;
 
 /*
  * #%L
@@ -32,6 +32,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 import org.activehome.com.Notif;
 import org.activehome.context.data.DataPoint;
+import org.activehome.energy.solax.SolaxInverter;
 import org.activehome.io.IO;
 import org.activehome.time.TimeControlled;
 import org.activehome.time.TimeStatus;
@@ -53,25 +54,10 @@ import java.util.concurrent.TimeUnit;
  * @version %I%, %G%
  */
 @ComponentType
-public class SolaxInverterEmulator extends IO {
+public class SolaxInverterEmulator extends SolaxInverter {
 
     @Param(defaultValue = "Load data from Solax historical data")
     private String description;
-    @Param(defaultValue = "/active-home-energy/tree/master/org.active-home.energy.emulator.solax")
-    private String src;
-
-    /**
-     * Commands.
-     */
-    @Param(defaultValue = "")
-    private String commands;
-    /**
-     * Label of the metric sent to the context.
-     */
-    @Param(defaultValue = "<compId>.gridPower,<compId>.feedInPower,<compId>.surplusEnergy," +
-            "<compId>.powerDC1,<compId>.powerDC2")
-    private String metrics;
-
 
     @Param(defaultValue = "solar")
     private String mongoDBName;
@@ -219,14 +205,26 @@ public class SolaxInverterEmulator extends IO {
             Document batDoc = doc.get(docName, Document.class);
             long ts = batDoc.getDate(dateFieldName).getTime();
             DataPoint[] dpArray = new DataPoint[6];
-            dpArray[0] = new DataPoint(getId() + ".gridPower", ts, batDoc.getInteger("gridPower") + "");
-            dpArray[1] = new DataPoint(getId() + ".feedInPower", ts, batDoc.getInteger("feedInPower") + "");
-            dpArray[2] = new DataPoint(getId() + ".powerDC1", ts, batDoc.getInteger("powerDC1") + "");
-            dpArray[3] = new DataPoint(getId() + ".powerDC2", ts, batDoc.getInteger("powerDC2") + "");
-            dpArray[4] = new DataPoint(getId() + ".batteryPower", ts, batDoc.getInteger("batteryPower") + "");
-            dpArray[5] = new DataPoint(getId() + ".surplusPower", ts, batDoc.getInteger("surplusEnergy") + "");
+            int gen1 = batDoc.getInteger("powerDC1");
+            int gen2 = batDoc.getInteger("powerDC2");
+            int feedIn = batDoc.getInteger("feedInPower");
+            double powerCons = batDoc.getInteger("gridPower")*1.;
+            if (feedIn>0) {
+                powerCons += feedIn;
+            }
+
+            dpArray[0] = new DataPoint("power.cons", ts, powerCons + "");
+            dpArray[1] = new DataPoint("power.gen." + getId() + "1", ts, gen1 + "");
+            dpArray[2] = new DataPoint("power.gen." + getId() + "2", ts, gen2 + "");
+            int availabilityPercent = batDoc.getInteger("surplusEnergy");
+            double availability = availabilityPercent*getStorageCapacity()/100.;
+            dpArray[3] = new DataPoint("storage.availabilityKWh", ts, availability + "");
+            dpArray[4] = new DataPoint("storage.availabilityPercent", ts, availabilityPercent + "");
+            dpArray[5] = new DataPoint("power.storage", ts, batDoc.getInteger("batteryPower") + "");
             data.addLast(dpArray);
         }
+        logInfo("load data, found: " +docs.size());
+        logInfo("load data, total: " +data.size());
 
     }
 

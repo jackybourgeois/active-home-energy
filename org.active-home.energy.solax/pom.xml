@@ -9,11 +9,11 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.active-home.energy.emulator.solax</artifactId>
+    <artifactId>org.active-home.energy.solax</artifactId>
     <version>0.0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>Active Home :: Energy :: Emulator :: Solax</name>
-    <description>Load data from Solax historical data</description>
+    <name>Active Home :: Energy :: Solax</name>
+    <description>Set of components for solax devices and their emulators</description>
     <url>http://active-home.org</url>
 
     <dependencies>
