@@ -55,6 +55,12 @@ public class BatteryAutonomy extends Service implements RequestHandler {
     private String demo;
 
     /**
+     * The necessary bindings.
+     */
+    @Param(defaultValue = "getNotif>Context.pushDataToSystem")
+    private String bindingBatteryAutonomy;
+
+    /**
      * The maximum rate that we can take out of the battery
      * (should be found dynamically).
      */
@@ -105,11 +111,6 @@ public class BatteryAutonomy extends Service implements RequestHandler {
                 "power.cons", "power.storage");
         batteryEnergyUnits = new LinkedList<>();
         usedEnergyUnits = new LinkedList<>();
-    }
-
-    protected UserInfo testUser() {
-        return new UserInfo("tester", new String[]{"user"},
-                "ah", "org.activehome.user.emulator.EUser");
     }
 
     @Override
@@ -192,7 +193,7 @@ public class BatteryAutonomy extends Service implements RequestHandler {
      *
      * @param ts evaluation time
      */
-    public final void autonomyHrsCurrentCons(long ts) {
+    public final void autonomyHrsCurrentCons(final long ts) {
         if (currentConsumption > 0 && currentSoCKWh > 0) {
             // limit the discharging rate to the maximum rate
             double power = currentConsumption;
