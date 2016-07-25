@@ -1,2 +1,3 @@
 add ah.battery : org.activehome.energy.battery.BatteryAutonomy/0.0.3-SNAPSHOT
 add ah.solax : org.activehome.energy.solax.emulator.SolaxInverterEmulator/0.0.3-SNAPSHOT
+set ah.solax.userId = "223c3bcf0bd16c30b5024838ab9257b5"
