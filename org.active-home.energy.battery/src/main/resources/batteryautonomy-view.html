@@ -279,7 +279,7 @@
                 if (!isNaN(this.currentLatency)) {
                     var latency = parseFloat(this.currentLatency);
                     var width = (60 * latency) < 240 ? (60 * latency) : 240;
-                    document.getElementById('batteryArea').style.width = + "px";
+                    document.getElementById('batteryArea').style.width = width + "px";
                 }
             },
 
