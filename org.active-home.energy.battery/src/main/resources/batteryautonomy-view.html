@@ -1,0 +1,294 @@
+<!--
+  #%L
+  Active Home :: Energy :: Battery
+  $Id:$
+  $HeadURL:$
+  %%
+  Copyright (C) 2016 Active Home Project
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as
+  published by the Free Software Foundation, either version 3 of the 
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public 
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/gpl-3.0.html>.
+  #L%
+  -->
+<dom-module id="batteryautonomy-view">
+
+    <template>
+
+        <style>
+            .battery {
+                fill-opacity: 1;
+                /*stroke: #000000;*/
+                /*stroke-width: 2;*/
+                /*stroke-linecap: round;*/
+                /*stroke-linejoin: round;*/
+                /*stroke-miterlimit: 4;*/
+                /*stroke-opacity: 1;*/
+                /*stroke-dasharray: none;*/
+                /*stroke-dashoffset: 0*/
+            }
+
+            .bat-container {
+                fill: url(#linearGradient3151);
+            }
+
+            .bat-content {
+                fill: url(#linearGradient3153);
+            }
+
+            .bat-top {
+                fill: url(#linearGradient3150);
+            }
+
+            .bat-topPart {
+                fill: url(#linearGradient3149);
+            }
+        </style>
+
+        <div style="background-color: #ffffff">
+
+            <h1>Battery Autonomy</h1>
+
+            ${gradient}
+
+            <div id="batteryArea" style="position:absolute;width:60px;">
+                <svg id="batterySVG" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 138"
+                     style="width:100%;height: 100%;" version="1.1">
+                    <g id="battery">
+                        <rect class="battery bat-content" ry="16" rx="117" y="0" x="1" height="136" width="78"
+                              id="battery-content"/>
+                        <rect class="battery bat-container" y="0" rx="117" ry="16" x="1" width="78" height="68"
+                              id="battery-container"/>
+                        <rect class="battery bat-top" ry="16" rx="117" y="0" x="1" height="36" width="78" id="rect98"/>
+                        <rect class="battery bat-topPart" ry="9" rx="117" y="5" x="26" height="13" width="28"
+                              id="rect100"/>
+                    </g>
+                </svg>
+            </div>
+
+
+            <div id="info" style="margin-left: 250px;font-size: 12px">
+
+                <ul>
+                    <li>State of charge: {{soc}} %</li>
+                    <li>Power rate: {{powerRate}} W</li>
+                    <li>Status: {{batteryStatus}}</li>
+                </ul>
+
+                <div id="latency">
+                    <h2>Latency</h2>
+
+                    <ul>
+                        <li>Current latency: {{currentLatency}} hrs</li>
+                        <li>Last hour latency: {{lastHourLatency}} hrs</li>
+                    </ul>
+                </div>
+
+                <div id="autonomy">
+                    <h2>Autonomy:</h2>
+
+                    <ul>
+                        <li>Based on Current consumption: {{autonomyCurrentCons}} hrs</li>
+                        <li>Based on Consumption prediction: {{autonomyConsPred}} hrs</li>
+                        <li>Based on Cons. and Gen. prediction: {{autonomyConsGenPred}} hrs</li>
+                    </ul>
+                </div>
+
+                <div id="timeToCharge">
+                    <h2>Remaining time to full charge:</h2>
+
+                    <ul>
+                        <li>Based on Current generation: {{toChargeCurrentGen}} hrs</li>
+                        <li>Based on Generation prediction: {{toChargeGenPred}} hrs</li>
+                        <li>Based on Cons. and Gen. prediction: {{toChargeConsGenPred}} hrs</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'batteryautonomy-view',
+
+            properties: {
+                soc: {
+                    type: String,
+                    value: "-",
+                    observer: "updateBattery"
+                },
+                autonomyCurrentCons: {
+                    type: String,
+                    value: "-"
+                },
+                autonomyConsPred: {
+                    type: String,
+                    value: "-"
+                },
+                autonomyConsGenPred: {
+                    type: String,
+                    value: "-"
+                },
+                toChargeCurrentGen: {
+                    type: String,
+                    value: "-"
+                },
+                toChargeGenPred: {
+                    type: String,
+                    value: "-"
+                },
+                toChargeGenConsPred: {
+                    type: String,
+                    value: "-"
+                },
+                currentLatency: {
+                    type: String,
+                    value: "-"
+                },
+                lastHourLatency: {
+                    type: String,
+                    value: "-"
+                },
+                powerRate: {
+                    type: String,
+                    value: "-"
+                },
+                batteryStatus: {
+                    type: String,
+                    value: "-"
+                }
+            },
+
+            listeners: {
+                "context-branch-selected": "loadPastFutureData"
+            },
+
+            ready: function () {
+                if (document.querySelector("web-socket").loggedIn) {
+                    this.websocketConnected();
+                }
+                var comp = this;
+                window.addEventListener('websocket-loggedIn', function (e) {
+                    comp.loadContent();
+                    comp.websocketConnected();
+                });
+            },
+
+            loadContent: function () {
+                var ajax = this.$.ajax;
+                ajax.method = "GET";
+                ajax.url = "/${id}/currentValues";
+                ajax.generateRequest();
+            },
+
+            updateAttributes: function (attrs) {
+
+            },
+
+            input: function (json) {
+                if (json.hasOwnProperty("content") && json.content.type.endsWith("DataPoint")) {
+                    this.updateDP(json.content);
+                }
+            },
+
+            updateDP: function (dp) {
+                switch (dp.metricId) {
+                    case "storage.autonomy.currentCons":
+                        this.autonomyCurrentCons = this.format(dp.value);
+                        break;
+                    case "storage.autonomy.consPred":
+                        this.autonomyConsPred = this.format(dp.value);
+                        break;
+                    case "storage.autonomy.consGenPred":
+                        this.autonomyConsGenPred = this.format(dp.value);
+                        break;
+                    case "storage.toCharge.currentGen":
+                        this.toChargeCurrentGen = this.format(dp.value);
+                        break;
+                    case "storage.toCharge.genPred":
+                        this.toChargeGenPred = this.format(dp.value);
+                        break;
+                    case "storage.toCharge.consGenPred":
+                        this.toChargeConsGenPred = this.format(dp.value);
+                        break;
+                    case "storage.latency.current":
+                        this.currentLatency = this.format(dp.value);
+                        break;
+                    case "storage.latency.lastHour":
+                        this.lastHourLatency = this.format(dp.value);
+                        break;
+                    case "storage.availabilityPercent":
+                        this.soc = this.format(dp.value);
+                        break;
+                    case "power.storage":
+                        this.powerRate = this.format(dp.value);
+                        break;
+                    case "storage.status":
+                        this.updateStatus(dp.value);
+                        break;
+                }
+            },
+
+            handleResponse: function (e) {
+                if (e.detail.response.isArray()) {
+                    var dpArray = e.detail.response;
+                    for (var i in dpArray) {
+                        if (e.detail.response.hasOwnProperty("type") && e.detail.response.type.endsWith("")) {
+                            this.updateDP(dpArray[i]);
+                        }
+                    }
+                }
+            },
+
+            stop: function () {
+
+            },
+
+            websocketConnected: function () {
+                document.querySelector("web-socket").subscribe(this.id, "storage.*", this);
+                document.querySelector("web-socket").subscribe(this.id, "power.storage", this);
+            },
+
+            updateStatus: function (status) {
+                this.batteryStatus = this.format(status);
+            },
+
+            updateBattery: function () {
+                if (!isNaN(this.soc)) {
+                    var interval = parseFloat(this.soc);
+                    battery_container = document.getElementById('battery-container');
+                    battery_container.setAttribute("height", 135 - interval);
+//                    if (interval == 0) {
+//                        battery_container.style.fill = "url(#linearGradient3151)";
+//                    } else {
+//                        battery_container.style.fill = "url(#linearGradient3153)";
+//                    }
+                }
+                if (!isNaN(this.currentLatency)) {
+                    var latency = parseFloat(this.currentLatency);
+                    var width = (60 * latency) < 240 ? (60 * latency) : 240;
+                    document.getElementById('batteryArea').style.width = + "px";
+                }
+            },
+
+            format: function(strNum) {
+                if (!isNaN(strNum)) {
+                    return Math.round(parseFloat(strNum) * 1000) / 1000;
+                }
+                return strNum;
+            }
+        });
+    </script>
+</dom-module>

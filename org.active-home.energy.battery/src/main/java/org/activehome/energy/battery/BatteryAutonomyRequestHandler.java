@@ -28,17 +28,11 @@ package org.activehome.energy.battery;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
-import org.activehome.com.Notif;
 import org.activehome.com.Request;
-import org.activehome.com.RequestCallback;
-import org.activehome.context.Context;
-import org.activehome.context.com.ContextRequest;
-import org.activehome.context.data.DataPoint;
-import org.activehome.context.data.Trigger;
-import org.activehome.context.data.UserInfo;
 import org.activehome.service.RequestHandler;
 import org.activehome.tools.file.FileHelper;
 import org.activehome.tools.file.TypeMime;
+import org.kevoree.log.Log;
 
 /**
  * Dedicated handler for BatteryAutonomy request.
@@ -72,8 +66,8 @@ public class BatteryAutonomyRequestHandler implements RequestHandler {
      */
     public final Object html() {
         JsonObject wrap = new JsonObject();
-        wrap.add("name", "battery-view");
-        wrap.add("url", service.getId() + "/battery-view.html");
+        wrap.add("name", "batteryautonomy-view");
+        wrap.add("url", service.getId() + "/batteryautonomy-view.html");
         wrap.add("title", "AH Battery Autonomy");
         wrap.add("description", "Active Home Battery Autonomy");
 
@@ -91,12 +85,44 @@ public class BatteryAutonomyRequestHandler implements RequestHandler {
                 getClass().getClassLoader());
         if (fileName.endsWith(".html")) {
             content = content.replaceAll("\\$\\{id\\}", service.getId());
+            if (fileName.equals("batteryautonomy-view.html")) {
+                String gradient = FileHelper.fileToString("gradient.svg",
+                        getClass().getClassLoader());
+                content = content.replace("${gradient}", gradient);
+            }
         }
         JsonObject json = new JsonObject();
         json.add("content", content);
         json.add("mime", TypeMime.valueOf(
                 fileName.substring(fileName.lastIndexOf(".") + 1,
                         fileName.length())).getDesc());
+        return json;
+    }
+
+    public final JsonValue currentValues() {
+        JsonObject json = new JsonObject();
+        json.add("storage.availabilityKWh", service.getCurrentSoCKWh() + "");
+        json.add("storage.availabilityPercent", service.getCurrentSoCPercent() + "");
+        json.add("power.storage", service.getCurrentBatteryPower().getValue());
+        json.add("storage.status", service.getCurrentStatus().name());
+        if (service.getAutonomyCurrentCons()!=null) {
+            json.add("storage.autonomyCurrentCons", service.getAutonomyCurrentCons());
+        }
+        if (service.getAutonomyConsPred()!=null) {
+            json.add("storage.autonomyConsPred", service.getAutonomyConsPred());
+        }
+        if (service.getAutonomyConsGenPrd()!=null) {
+            json.add("storage.autonomyConsGenPred", service.getAutonomyConsGenPrd());
+        }
+        if (service.getRemainingCurrentGen()!=null) {
+            json.add("storage.remainingCurrentGen", service.getRemainingCurrentGen());
+        }
+        if (service.getRemainingGenPred()!=null) {
+            json.add("storage.remainingGenPred", service.getRemainingGenPred());
+        }
+        if (service.getRemainingGenConsPrd()!=null) {
+            json.add("storage.remainingGenCons", service.getRemainingGenConsPrd());
+        }
         return json;
     }
 

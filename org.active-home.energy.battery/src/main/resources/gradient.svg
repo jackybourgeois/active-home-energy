@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
+  <defs id="defs3154">
+      <linearGradient xlink:href="#linearGradient4272" id="linearGradient3153"
+        gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.31560694,0,0,0.38920386,-17,880)"
+        x1="56" y1="178" x2="305" y2="178" />
+      </linearGradient>
+      <linearGradient xlink:href="#linearGradient3804" id="linearGradient3151"
+         gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.31560694,0,0,0.77624804,-17,845)"
+         x1="56" y1="179" x2="305" y2="179" />
+      </linearGradient>
+      <linearGradient xlink:href="#linearGradient4280" id="linearGradient3150"
+             gradientTransform="matrix(0.31560694,0,0,0.20487803,-17,897)" gradientUnits="userSpaceOnUse"
+             y2="179" x2="305" y1="179" x1="56" />
+      </linearGradient>
+      <linearGradient xlink:href="#linearGradient3137" id="linearGradient3149"
+             gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.11329482,0,0,0.07398373,19,913)"
+             x1="56" y1="179" x2="305" y2="179" />
+      </linearGradient>
+
+        <linearGradient id="linearGradient4280">
+           <stop style="stop-color:#000000;stop-opacity:1;" offset="0" />
+           <stop offset="0.5" style="stop-color:#ffffff;stop-opacity:0;" />
+           <stop offset="1" style="stop-color:#000000;stop-opacity:1;" />
+         </linearGradient>
+
+         <linearGradient id="linearGradient4272">
+           <stop offset="0" style="stop-color:#000000;stop-opacity:1;" />
+           <stop style="stop-color:#3bd320;stop-opacity:1;" offset="0.5" />
+           <stop style="stop-color:#000000;stop-opacity:1;" offset="1" />
+         </linearGradient>
+
+         <linearGradient id="linearGradient3804">
+           <stop style="stop-color:#000000;stop-opacity:1;" offset="0" />
+           <stop offset="0.5" style="stop-color:#dfdfdf;stop-opacity:1;" />
+           <stop offset="1" style="stop-color:#000000;stop-opacity:1;" />
+         </linearGradient>
+
+         <linearGradient id="linearGradient3137">
+           <stop style="stop-color:#000000;stop-opacity:1;" offset="0" />
+           <stop offset="0.5" style="stop-color:#ffffff;stop-opacity:0;" />
+           <stop offset="1" style="stop-color:#000000;stop-opacity:1;" />
+         </linearGradient>
+
+
+         <linearGradient
+            id="blue-gradient">
+           <stop style="stop-color:#000080;stop-opacity:1;" offset="0" />
+           <stop style="stop-color:#000080;stop-opacity:0;" offset="1" />
+         </linearGradient>
+         <linearGradient xlink:href="#blue-gradient" id="blue-gradient-sunrise" x1="0" y1="0" x2="300" y2="0" gradientUnits="userSpaceOnUse" />
+         <linearGradient xlink:href="#blue-gradient" id="blue-gradient-sunset" x1="800" y1="0" x2="500" y2="0" gradientUnits="userSpaceOnUse" />
+
+         <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+             <feGaussianBlur in="SourceAlpha" stdDeviation="1" result="blur" />
+             <feOffset in="blur" dx="1" dy="1" result="shadow" />
+             <feMerge>
+                 <feMergeNode in="SourceGraphic"/><feMergeNode in="shadow"/>
+             </feMerge>
+         </filter>
+    </defs>
+</svg>
