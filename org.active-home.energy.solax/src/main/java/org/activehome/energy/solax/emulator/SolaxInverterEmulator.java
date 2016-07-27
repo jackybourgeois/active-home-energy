@@ -31,6 +31,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 import org.activehome.com.Notif;
+import org.activehome.com.Status;
 import org.activehome.context.data.DataPoint;
 import org.activehome.energy.solax.SolaxInverter;
 import org.activehome.io.IO;
@@ -42,6 +43,7 @@ import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.Param;
 import org.kevoree.annotation.Stop;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -68,13 +70,15 @@ public class SolaxInverterEmulator extends SolaxInverter {
 
     private MongoCollection<Document> collection;
     private MongoClient client;
-    MongoDatabase database;
+    private MongoDatabase database;
 
     /**
      * if time is paused, time when the time has been paused
      */
     private long pauseTime;
     private long endDataLoad;
+
+    private Status status = null;
 
     private ScheduledThreadPoolExecutor stpe;
     private LinkedList<DataPoint[]> data;
@@ -99,14 +103,19 @@ public class SolaxInverterEmulator extends SolaxInverter {
     public final void toExecute(final String reqStr) {
     }
 
+    public final void onInit() {
+        super.onInit();
+        endDataLoad = pauseTime = -1;
+        data = new LinkedList<>();
+        loadData(getCurrentTime(), getCurrentTime()+DAY);
+    }
+
     @Override
     public final void onStartTime() {
         super.onStartTime();
-        endDataLoad = pauseTime = -1;
-        data = new LinkedList<>();
         initExecutor();
-        loadData(getCurrentTime(), getCurrentTime() + TimeControlled.DAY);
         scheduleNextVal();
+        scheduleNextLoadingTime();
     }
 
     @Override
@@ -174,16 +183,19 @@ public class SolaxInverterEmulator extends SolaxInverter {
 
     private void scheduleNextLoadingTime() {
         long execTime;
+        long startTS;
         if (endDataLoad == -1) {
             execTime = 0;
+            startTS = getCurrentTime();
         } else {
             execTime = (endDataLoad - 4 * HOUR - getCurrentTime()) / getTic().getZip();
+            startTS = endDataLoad;
         }
-        stpe.schedule(() -> loadData(endDataLoad, endDataLoad + TimeControlled.DAY),
+        stpe.schedule(() -> loadData(startTS, startTS + TimeControlled.DAY),
                 execTime, TimeUnit.MILLISECONDS);
     }
 
-    public void loadData(final long start,
+    private void loadData(final long start,
                          final long end) {
         System.out.println(new Date(start) + " to " + new Date(end));
         String dateFieldName = "queryTime";
@@ -204,28 +216,42 @@ public class SolaxInverterEmulator extends SolaxInverter {
         for (Document doc : docs) {
             Document batDoc = doc.get(docName, Document.class);
             long ts = batDoc.getDate(dateFieldName).getTime();
-            DataPoint[] dpArray = new DataPoint[6];
             int gen1 = batDoc.getInteger("powerDC1");
             int gen2 = batDoc.getInteger("powerDC2");
             int feedIn = batDoc.getInteger("feedInPower");
-            double powerCons = batDoc.getInteger("gridPower")*1.;
-            if (feedIn>0) {
+            double powerCons = batDoc.getInteger("gridPower") * 1.;
+            if (feedIn > 0) {
                 powerCons += feedIn;
             }
+            int availabilityPercent = batDoc.getInteger("surplusEnergy");
+            double availability = availabilityPercent * getStorageCapacity() / 100.;
+            int batteryPower = batDoc.getInteger("batteryPower");
+            Status status = getStatus(batteryPower);
 
+            DataPoint[] dpArray = new DataPoint[7];
             dpArray[0] = new DataPoint("power.cons", ts, powerCons + "");
             dpArray[1] = new DataPoint("power.gen." + getId() + "1", ts, gen1 + "");
             dpArray[2] = new DataPoint("power.gen." + getId() + "2", ts, gen2 + "");
-            int availabilityPercent = batDoc.getInteger("surplusEnergy");
-            double availability = availabilityPercent*getStorageCapacity()/100.;
             dpArray[3] = new DataPoint("storage.availabilityKWh", ts, availability + "");
             dpArray[4] = new DataPoint("storage.availabilityPercent", ts, availabilityPercent + "");
-            dpArray[5] = new DataPoint("power.storage", ts, batDoc.getInteger("batteryPower") + "");
+            dpArray[5] = new DataPoint("storage.status", ts, status + "");
+            dpArray[6] = new DataPoint("power.storage", ts, batteryPower + "");
             data.addLast(dpArray);
         }
-        logInfo("load data, found: " +docs.size());
-        logInfo("load data, total: " +data.size());
 
+        endDataLoad = end;
+
+        logInfo("load data, found: " + docs.size());
+        logInfo("load data, total: " + data.size());
+    }
+
+    private Status getStatus(final int batteryPower) {
+        if (batteryPower > 0) {
+            return Status.CHARGING;
+        } else if (batteryPower < 0) {
+            return Status.DISCHARGING;
+        }
+        return Status.IDLE;
     }
 
 }
