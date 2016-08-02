@@ -30,16 +30,11 @@ import org.activehome.com.Notif;
 import org.activehome.com.Request;
 import org.activehome.com.Status;
 import org.activehome.context.data.DataPoint;
-import org.activehome.context.data.Schedule;
-import org.activehome.context.data.UserInfo;
 import org.activehome.service.RequestHandler;
 import org.activehome.service.Service;
-import org.activehome.tools.Convert;
 import org.kevoree.annotation.ComponentType;
 import org.kevoree.annotation.Input;
 import org.kevoree.annotation.Param;
-
-import java.util.LinkedList;
 
 /**
  * @author Jacky Bourgeois
@@ -108,28 +103,22 @@ public class BatteryAutonomy extends Service implements RequestHandler {
      */
     @Param(defaultValue = "100")
     private double latencyUnit;
+    /**
+     * Mode: true=lifo, false=fifo
+     */
+    @Param(defaultValue = "false")
+    private boolean lifoMode;
 
-    private double currentConsumption = -1;
+    private Autonomy autonomy;
+    private Delivery delivery;
+    private EnergyAge energyAge;
+
     private double currentSoCKWh = -1;
     private double currentSoCPercent = -1;
     private Status currentStatus = Status.UNKNOWN;
-    private DataPoint currentBatteryPower = null;
-
-    private Double autonomyCurrentCons;
-    private Double autonomyConsPred;
-    private Double autonomyConsGenPrd;
-
-    private Double remainingCurrentGen;
-    private Double remainingGenPred;
-    private Double remainingGenConsPrd;
 
     private double solaxGen1 = 0;
     private double solaxGen2 = 0;
-
-    private LinkedList<EnergyUnit> batteryEnergyUnits;
-    private LinkedList<EnergyUnit> usedEnergyUnits;
-    private double partialChargingUnit = 0;
-    private double partialDischargingUnit = 0;
 
     /**
      * On init, subscribe to relevant metrics.
@@ -137,11 +126,14 @@ public class BatteryAutonomy extends Service implements RequestHandler {
     @Override
     public final void onInit() {
         super.onInit();
+        BatteryInfo batteryInfo = new BatteryInfo(maxChargingRate, maxDischargingRate, minSoC, maxSoC,
+                capacityKWh, chargingEfficiency, dischargingEfficiency);
         listenAPI(getNode() + ".http", "/battery", true);
         subscribeToContext("storage.availabilityKWh", "storage.availabilityPercent",
                 "power.cons", "power.storage", "storage.status", "power.gen.solax1", "power.gen.solax2");
-        batteryEnergyUnits = new LinkedList<>();
-        usedEnergyUnits = new LinkedList<>();
+        autonomy = new Autonomy(batteryInfo);
+        delivery = new Delivery(batteryInfo);
+        energyAge = new EnergyAge(latencyUnit, batteryInfo, lifoMode);
     }
 
     @Override
@@ -160,38 +152,40 @@ public class BatteryAutonomy extends Service implements RequestHandler {
         if (notif.getDest().compareTo(getFullId()) == 0
                 && notif.getContent() instanceof DataPoint) {
             DataPoint dp = (DataPoint) notif.getContent();
+            long ts = dp.getTS();
             switch (dp.getMetricId()) {
                 case "power.cons":
-                    currentConsumption = Double.valueOf(dp.getValue());
-                    autonomyHrsCurrentCons(dp.getTS());
+                    autonomy.setCurrentConsumption(Double.valueOf(dp.getValue()));
+                    sendStorageNotif("storage.autonomy.currentCons", ts, autonomy.basedOnCurrentCons(ts));
                     break;
                 case "storage.availabilityKWh":
                     currentSoCKWh = Double.valueOf(dp.getValue());
                     break;
                 case "storage.availabilityPercent":
                     currentSoCPercent = Double.valueOf(dp.getValue());
-                    autonomyHrsCurrentCons(dp.getTS());
-                    remainingHrsCurrentGen(dp.getTS());
+                    autonomy.setCurrentSoCPercent(currentSoCPercent);
+                    sendStorageNotif("storage.autonomy.currentCons", ts, autonomy.basedOnCurrentCons(ts));
+                    delivery.setCurrentSoCPercent(currentSoCPercent);
+                    sendStorageNotif("storage.delivery.currentGen", ts, delivery.basedOnCurrentGen(ts));
                     break;
                 case "storage.status":
                     currentStatus = Status.valueOf(dp.getValue());
                     break;
                 case "power.gen.solax1":
                     solaxGen1 = Double.valueOf(dp.getValue());
-                    remainingHrsCurrentGen(dp.getTS());
+                    delivery.setGeneration(solaxGen1+solaxGen2);
+                    sendStorageNotif("storage.delivery.currentGen", ts, delivery.basedOnCurrentGen(ts));
                     break;
                 case "power.gen.solax2":
                     solaxGen2 = Double.valueOf(dp.getValue());
-                    remainingHrsCurrentGen(dp.getTS());
+                    delivery.setGeneration(solaxGen1+solaxGen2);
+                    sendStorageNotif("storage.delivery.currentGen", ts, delivery.basedOnCurrentGen(ts));
                     break;
                 case "power.storage":
-                    double power = Double.valueOf(dp.getValue());
-                    if (power > 0) {
-                        updateLatencyCharging(power, dp.getTS());
-                    } else if (power < 0) {
-                        updateLatencyDischarging(power, dp.getTS());
-                    }
-                    currentBatteryPower = dp;
+                    energyAge.setBatteryRate(dp);
+                    energyAge.updateAge(dp);
+                    sendStorageNotif("storage.age.current", ts, energyAge.averageCurrentAge(ts));
+                    sendStorageNotif("storage.age.lastHour", ts, energyAge.averageLastHourAge(ts));
                     break;
                 default:
 
@@ -199,178 +193,12 @@ public class BatteryAutonomy extends Service implements RequestHandler {
         }
     }
 
-    private void updateLatencyCharging(final double power,
-                                       final long ts) {
-        double latencyUnitWatt = latencyUnit / 1000.;
-        if (currentBatteryPower != null) {
-            long lastTS = currentBatteryPower.getTS();
-            double energy = Convert.watt2kWh(power * chargingEfficiency, ts - lastTS) + partialChargingUnit;
-            int nbFullEnergyUnit = (int) (energy / latencyUnitWatt);
-            partialChargingUnit = energy - (nbFullEnergyUnit * latencyUnitWatt);
-            for (int i = 0; i < nbFullEnergyUnit; i++) {
-                batteryEnergyUnits.addLast(new EnergyUnit(ts));
-            }
-//            logInfo("adding " + nbFullEnergyUnit + " energy units in the battery, total: " + batteryEnergyUnits.size());
 
-            computeCurrentLatency(ts);
-            computeLastHourLatency(ts);
-        }
-    }
-
-    private void updateLatencyDischarging(final double power,
-                                          final long ts) {
-        double latencyUnitWatt = latencyUnit / 1000.;
-        if (currentBatteryPower != null) {
-            long lastTS = currentBatteryPower.getTS();
-            double energy = Convert.watt2kWh(power * -1 * (2 - dischargingEfficiency), ts - lastTS) + partialDischargingUnit;
-            int nbFullEnergyUnit = (int) (energy / latencyUnitWatt);
-            int toMove = nbFullEnergyUnit;
-            partialDischargingUnit = energy - (nbFullEnergyUnit * latencyUnitWatt);
-            while (nbFullEnergyUnit > 0 && batteryEnergyUnits.size() > 0) {
-                EnergyUnit unit = batteryEnergyUnits.removeFirst();
-                unit.setTsOut(ts);
-                usedEnergyUnits.addLast(unit);
-                nbFullEnergyUnit--;
-            }
-//            logInfo("moved " + toMove + " energy unit from the battery to the used stack. " +
-//                    "now in bat: " + batteryEnergyUnits.size() + " and used: " + usedEnergyUnits.size());
-        }
-    }
-
-    /**
-     * Calculate the number of hours to discharge the battery till the minimum SoC (20%),
-     * based on the current consumption (or maximum discharging rate)
-     *
-     * @param ts evaluation time
-     */
-    public final void autonomyHrsCurrentCons(final long ts) {
-        double autonomyHrs = 0;
-        if (currentConsumption > 0 && currentSoCPercent > minSoC) {
-            // limit the discharging rate to the maximum rate
-            double power = currentConsumption;
-            if (power > maxDischargingRate) {
-                power = maxDischargingRate;
-            }
-
-            double toDischarge = currentSoCKWh - (minSoC * (capacityKWh*1000.) / 100);
-            autonomyHrs = toDischarge / power;
-        }
-        if (autonomyHrs >= 0) {
-            sendNotif(new Notif(getFullId(), getNode() + ".context", getCurrentTime(),
-                    new DataPoint("storage.autonomy.currentCons", ts, autonomyHrs + "")));
-        }
-    }
-
-    /**
-     * Calculate the number of hours to discharge the battery till the minimum SoC (20%),
-     * based on the predicted consumption (or maximum discharging rate)
-     *
-     * @param ts evaluation time
-     */
-    public final void autonomyHrsConsPrediction(final long ts,
-                                                final Schedule prediction) {
-
-    }
-
-    /**
-     * Calculate the number of hours to discharge the battery till the minimum SoC (20%),
-     * based on the predicted consumption and generation (or maximum discharging rate)
-     *
-     * @param ts evaluation time
-     */
-    public final void autonomyHrsConsGenPrediction(final long ts,
-                                                   final Schedule prediction) {
-
-    }
-
-    /**
-     * Calculate the number of hours remaining to fully charge the battery,
-     * based on the current generation (or maximum charging rate)
-     *
-     * @param ts evaluation time
-     */
-    public final void remainingHrsCurrentGen(final long ts) {
-        double totGen = solaxGen1 + solaxGen2;
-        // we are generating and the battery is not fully charged yet
-        if (totGen > 0 && currentSoCPercent < maxSoC) {
-            // limit the charging rate to the maximum charging rate
-            double power = totGen;
-            if (power > maxChargingRate) {
-                power = maxChargingRate;
-            }
-
-            double toCharge = (maxSoC * (capacityKWh*1000.) / 100) - currentSoCKWh;
-            double remainingHrs = toCharge / power;
-
-            if (remainingHrs >= 0) {
-                sendNotif(new Notif(getFullId(), getNode() + ".context", getCurrentTime(),
-                        new DataPoint("storage.toCharge.currentGen", ts, remainingHrs + "")));
-            }
-        } else if (currentSoCPercent == maxSoC) {
-            sendNotif(new Notif(getFullId(), getNode() + ".context", getCurrentTime(),
-                    new DataPoint("storage.toCharge.currentGen", ts, "0")));
-        }
-    }
-
-    /**
-     * Calculate the number of hours remaining to fully charge the battery,
-     * based on the predicted generation (or maximum charging rate)
-     *
-     * @param ts evaluation time
-     */
-    public final void remainingHrsGenPrediction(final long ts,
-                                                final Schedule prediction) {
-
-    }
-
-    /**
-     * Calculate the number of hours remaining to fully charge the battery,
-     * based on the predicted generation and Consumption (or maximum charging rate)
-     *
-     * @param ts evaluation time
-     */
-    public final void remainingHrsGenConsPrediction(final long ts,
-                                                    final Schedule prediction) {
-
-    }
-
-    /**
-     * Generate storage.latency.current, the average storing time
-     * of the energy units currently inside the battery.
-     */
-    public final void computeCurrentLatency(final long ts) {
-        long currentTotalLatency = 0;
-        for (EnergyUnit eu : batteryEnergyUnits) {
-            currentTotalLatency += ts - eu.getTsIn();
-        }
-        double currentLatency = 0;
-        if (batteryEnergyUnits.size() > 0) {
-            currentLatency = (currentTotalLatency / 3600000.) / batteryEnergyUnits.size();
-        }
+    private void sendStorageNotif(final String metric,
+                                  final long ts,
+                                  final double val) {
         sendNotif(new Notif(getFullId(), getNode() + ".context", getCurrentTime(),
-                new DataPoint("storage.latency.current", ts, currentLatency + "")));
-    }
-
-    /**
-     * Generate storage.latency.lastHour, the average storing time
-     * of the energy units discharged over the last hour.
-     */
-    public final void computeLastHourLatency(final long ts) {
-        long lastHourTotalLatency = 0;
-        for (EnergyUnit eu : usedEnergyUnits) {
-            lastHourTotalLatency += ts - eu.getTsIn();
-        }
-
-        double lastHourLatency = 0;
-        if (batteryEnergyUnits.size() > 0) {
-            lastHourLatency = (lastHourTotalLatency / 3600000.) / batteryEnergyUnits.size();
-        }
-        sendNotif(new Notif(getFullId(), getNode() + ".context", getCurrentTime(),
-                new DataPoint("storage.latency.lastHour", ts, lastHourLatency + "")));
-    }
-
-    public double getCurrentConsumption() {
-        return currentConsumption;
+                new DataPoint(metric, ts, val + "")));
     }
 
     public double getCurrentSoCKWh() {
@@ -381,35 +209,8 @@ public class BatteryAutonomy extends Service implements RequestHandler {
         return currentSoCPercent;
     }
 
-    public DataPoint getCurrentBatteryPower() {
-        return currentBatteryPower;
-    }
-
     public Status getCurrentStatus() {
         return currentStatus;
     }
 
-    public Double getAutonomyCurrentCons() {
-        return autonomyCurrentCons;
-    }
-
-    public Double getAutonomyConsPred() {
-        return autonomyConsPred;
-    }
-
-    public Double getAutonomyConsGenPrd() {
-        return autonomyConsGenPrd;
-    }
-
-    public Double getRemainingCurrentGen() {
-        return remainingCurrentGen;
-    }
-
-    public Double getRemainingGenPred() {
-        return remainingGenPred;
-    }
-
-    public Double getRemainingGenConsPrd() {
-        return remainingGenConsPrd;
-    }
 }

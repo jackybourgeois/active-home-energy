@@ -33,9 +33,11 @@ public class EnergyUnit {
 
     private long tsIn;
     private long tsOut;
+    private boolean consumed;
 
     public EnergyUnit(long tsIn) {
         this.tsIn = tsIn;
+        this.consumed = false;
     }
 
     public long getTsIn() {
@@ -48,9 +50,14 @@ public class EnergyUnit {
 
     public void setTsOut(long tsOut) {
         this.tsOut = tsOut;
+        this.consumed = true;
     }
 
-    public long getLatency() {
-        return tsOut-tsIn;
+    public double getAge() {
+        return (tsOut-tsIn)/3600000.;
+    }
+
+    public boolean isConsumed() {
+        return consumed;
     }
 }

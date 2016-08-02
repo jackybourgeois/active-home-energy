@@ -103,26 +103,26 @@ public class BatteryAutonomyRequestHandler implements RequestHandler {
         JsonObject json = new JsonObject();
         json.add("storage.availabilityKWh", service.getCurrentSoCKWh() + "");
         json.add("storage.availabilityPercent", service.getCurrentSoCPercent() + "");
-        json.add("power.storage", service.getCurrentBatteryPower().getValue());
-        json.add("storage.status", service.getCurrentStatus().name());
-        if (service.getAutonomyCurrentCons()!=null) {
-            json.add("storage.autonomyCurrentCons", service.getAutonomyCurrentCons());
-        }
-        if (service.getAutonomyConsPred()!=null) {
-            json.add("storage.autonomyConsPred", service.getAutonomyConsPred());
-        }
-        if (service.getAutonomyConsGenPrd()!=null) {
-            json.add("storage.autonomyConsGenPred", service.getAutonomyConsGenPrd());
-        }
-        if (service.getRemainingCurrentGen()!=null) {
-            json.add("storage.remainingCurrentGen", service.getRemainingCurrentGen());
-        }
-        if (service.getRemainingGenPred()!=null) {
-            json.add("storage.remainingGenPred", service.getRemainingGenPred());
-        }
-        if (service.getRemainingGenConsPrd()!=null) {
-            json.add("storage.remainingGenCons", service.getRemainingGenConsPrd());
-        }
+//        json.add("power.storage", service.getCurrentBatteryPower().getValue());
+//        json.add("storage.status", service.getCurrentStatus().name());
+//        if (service.getAutonomyCurrentCons()!=null) {
+//            json.add("storage.autonomyCurrentCons", service.getAutonomyCurrentCons());
+//        }
+//        if (service.getAutonomyConsPred()!=null) {
+//            json.add("storage.autonomyConsPred", service.getAutonomyConsPred());
+//        }
+//        if (service.getAutonomyConsGenPrd()!=null) {
+//            json.add("storage.autonomyConsGenPred", service.getAutonomyConsGenPrd());
+//        }
+//        if (service.getRemainingCurrentGen()!=null) {
+//            json.add("storage.remainingCurrentGen", service.getRemainingCurrentGen());
+//        }
+//        if (service.getRemainingGenPred()!=null) {
+//            json.add("storage.remainingGenPred", service.getRemainingGenPred());
+//        }
+//        if (service.getRemainingGenConsPrd()!=null) {
+//            json.add("storage.remainingGenCons", service.getRemainingGenConsPrd());
+//        }
         return json;
     }
 
