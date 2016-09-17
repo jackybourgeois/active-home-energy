@@ -37,7 +37,6 @@ public class GridWatchLoader {
         String line;
         String[] values = new String[]{};
         boolean label = true;
-        System.out.println(is);
         try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             while ((line = br.readLine()) != null) {
                 if (!label) {
